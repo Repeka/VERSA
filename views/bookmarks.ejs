@@ -1,0 +1,17 @@
+<%- include('partials/header') %>
+
+<div class="feed-header">
+  <h1>Saved posts</h1>
+</div>
+
+<% if (posts.length === 0) { %>
+  <div class="empty">You haven't saved anything yet. Open a post and click Save.</div>
+<% } else { %>
+  <div class="feed">
+    <% posts.forEach(function (post) { %>
+      <%- include('partials/post-card', { post: post }) %>
+    <% }) %>
+  </div>
+<% } %>
+
+<%- include('partials/footer') %>

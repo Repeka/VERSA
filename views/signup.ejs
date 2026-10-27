@@ -1,0 +1,26 @@
+<%- include('partials/header') %>
+
+<div class="auth-card">
+  <h1>Join VERSA</h1>
+  <% if (error) { %>
+    <p class="error"><%= error %></p>
+  <% } %>
+  <form action="/signup" method="POST">
+    <label>Username</label>
+    <input type="text" name="username" value="<%= form.username || '' %>" required>
+
+    <label>Email</label>
+    <input type="email" name="email" value="<%= form.email || '' %>" required>
+
+    <label>Password</label>
+    <input type="password" name="password" required>
+
+    <label>Confirm password</label>
+    <input type="password" name="confirm" required>
+
+    <button type="submit" class="btn btn-solid btn-big">Create account</button>
+  </form>
+  <p class="auth-switch">Already a member? <a href="/login">Log in</a></p>
+</div>
+
+<%- include('partials/footer') %>

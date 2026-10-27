@@ -1,0 +1,121 @@
+<%- include('partials/header') %>
+
+<article class="post">
+  <span class="badge badge-<%= post.type %>"><%= post.type %></span>
+  <h1><%= post.title %></h1>
+
+  <div class="post-author">
+    <% if (post.avatar) { %>
+      <img class="avatar avatar-small" src="<%= post.avatar %>" alt="">
+    <% } else { %>
+      <div class="avatar avatar-small avatar-letter"><%= post.username.charAt(0).toUpperCase() %></div>
+    <% } %>
+    <a href="/u/<%= post.username %>"><%= post.display_name || post.username %></a>
+    <span class="post-date">· <%= post.created_at.slice(0, 10) %></span>
+  </div>
+
+  <% if (post.type === 'artwork') { %>
+    <img class="post-image" src="<%= post.image %>" alt="<%= post.title %>">
+  <% } %>
+
+  <% if (post.body) { %>
+    <div class="post-body <%= post.type === 'poem' ? 'poem' : '' %>"><%= post.body %></div>
+  <% } %>
+
+  <div class="actions">
+  <div class="vote-box">
+    <% if (!isOwner) { %>
+      <form action="/posts/<%= post.id %>/vote" method="POST">
+        <input type="hidden" name="value" value="up">
+        <button type="submit" class="vote-btn <%= vote === 1 ? 'active-up' : '' %>" title="Upvote">▲</button>
+      </form>
+    <% } %>
+
+    <span class="score"><%= score %></span>
+
+    <% if (!isOwner) { %>
+      <form action="/posts/<%= post.id %>/vote" method="POST">
+        <input type="hidden" name="value" value="down">
+        <button type="submit" class="vote-btn <%= vote === -1 ? 'active-down' : '' %>" title="Downvote">▼</button>
+      </form>
+    <% } %>
+  </div>
+
+  <form action="/posts/<%= post.id %>/bookmark" method="POST">
+    <button type="submit" class="action-btn <%= bookmarked ? 'active' : '' %>">
+      <%= bookmarked ? '★ Saved' : '☆ Save' %>
+    </button>
+  </form>
+</div>
+
+<% if (justReported) { %>
+  <p class="notice">Thank you. Your report was sent to the admin.</p>
+<% } %>
+
+<% if (!isOwner) { %>
+  <details class="report-box">
+    <summary>⚑ Report this post</summary>
+    <% if (reported) { %>
+      <p class="no-comments">You already reported this post.</p>
+    <% } else { %>
+      <form action="/posts/<%= post.id %>/report" method="POST">
+        <label>Why are you reporting it?</label>
+        <select name="reason">
+          <option>Spam</option>
+          <option>Disrespectful or hateful</option>
+          <option>Inappropriate content</option>
+          <option>Other</option>
+        </select>
+        <textarea name="details" rows="3" maxlength="500" placeholder="Anything else we should know? (optional)"></textarea>
+        <button type="submit" class="btn-delete">Send report</button>
+      </form>
+    <% } %>
+  </details>
+<% } %>
+
+  <% if (isOwner) { %>
+    <form action="/posts/<%= post.id %>/delete" method="POST" onsubmit="return confirm('Delete this post for good?');">
+      <button type="submit" class="btn-delete">Delete post</button>
+    </form>
+  <% } %>
+</article>
+<section class="comments" id="comments">
+  <% const isQuestion = post.type === 'question'; %>
+  <h2><%= isQuestion ? 'Answers' : 'Comments' %> (<%= comments.length %>)</h2>
+
+  <form action="/posts/<%= post.id %>/comments" method="POST" class="comment-form">
+    <textarea name="body" rows="3" maxlength="1000" required
+      placeholder="<%= isQuestion ? 'Share a thoughtful, respectful answer...' : 'Write a kind comment...' %>"></textarea>
+    <button type="submit" class="btn btn-solid">
+      <%= isQuestion ? 'Post answer' : 'Post comment' %>
+    </button>
+  </form>
+
+  <% if (comments.length === 0) { %>
+    <p class="no-comments">Nothing here yet. Start the conversation!</p>
+  <% } %>
+
+  <% comments.forEach(function (c) { %>
+    <div class="comment" id="comment-<%= c.id %>">
+      <div class="post-author">
+        <% if (c.avatar) { %>
+          <img class="avatar avatar-small" src="<%= c.avatar %>" alt="">
+        <% } else { %>
+          <div class="avatar avatar-small avatar-letter"><%= c.username.charAt(0).toUpperCase() %></div>
+        <% } %>
+        <a href="/u/<%= c.username %>"><%= c.display_name || c.username %></a>
+        <span class="post-date">· <%= c.created_at.slice(0, 10) %></span>
+      </div>
+
+      <p class="comment-body"><%= c.body %></p>
+
+      <% if (c.user_id === currentUser.id) { %>
+        <form action="/comments/<%= c.id %>/delete" method="POST" onsubmit="return confirm('Delete this comment?');">
+          <button type="submit" class="comment-delete">Delete</button>
+        </form>
+      <% } %>
+    </div>
+  <% }) %>
+</section>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,85 @@
+const express = require('express');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+const db = require('../db');
+
+const router = express.Router();
+
+// Where avatar pictures are saved (created automatically)
+const avatarDir = path.join(__dirname, '..', 'public', 'uploads', 'avatars');
+fs.mkdirSync(avatarDir, { recursive: true });
+
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: avatarDir,
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname).toLowerCase();
+      cb(null, `user-${req.session.userId}-${Date.now()}${ext}`);
+    }
+  }),
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2 MB
+  fileFilter: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    const ok = ['.png', '.jpg', '.jpeg', '.gif', '.webp'].includes(ext);
+    cb(ok ? null : new Error('Only image files (png, jpg, gif, webp) are allowed.'), ok);
+  }
+});
+
+// Only logged-in people can use VERSA
+function requireLogin(req, res, next) {
+  if (!res.locals.currentUser) return res.redirect('/login');
+  next();
+}
+
+// View a profile
+router.get('/u/:username', requireLogin, (req, res) => {
+  const profileUser = db
+    .prepare('SELECT id, username, display_name, bio, avatar, created_at FROM users WHERE username = ?')
+    .get(req.params.username);
+
+  if (!profileUser) return res.status(404).send('User not found');
+
+  res.render('profile', {
+    title: profileUser.username,
+    profileUser,
+    isOwner: profileUser.id === res.locals.currentUser.id
+  });
+});
+
+// Edit page
+router.get('/profile/edit', requireLogin, (req, res) => {
+  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.session.userId);
+  res.render('profile-edit', { title: 'Edit profile', error: null, user });
+});
+
+// Save changes
+router.post('/profile/edit', requireLogin, (req, res) => {
+  upload.single('avatar')(req, res, (err) => {
+    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.session.userId);
+
+    if (err) {
+      const msg = err.code === 'LIMIT_FILE_SIZE' ? 'Image must be 2 MB or smaller.' : err.message;
+      return res.render('profile-edit', { title: 'Edit profile', error: msg, user });
+    }
+
+    const displayName = (req.body.display_name || '').trim().slice(0, 40);
+    const bio = (req.body.bio || '').trim().slice(0, 300);
+
+    let avatar = user.avatar;
+    if (req.file) {
+      avatar = '/uploads/avatars/' + req.file.filename;
+      if (user.avatar) {
+        // remove the old picture
+        fs.unlink(path.join(__dirname, '..', 'public', user.avatar), () => {});
+      }
+    }
+
+    db.prepare('UPDATE users SET display_name = ?, bio = ?, avatar = ? WHERE id = ?')
+      .run(displayName, bio, avatar, user.id);
+
+    res.redirect('/u/' + user.username);
+  });
+});
+
+module.exports = router;

@@ -1,0 +1,27 @@
+<article class="feed-card feed-<%= post.type %>">
+  <div class="feed-top">
+    <span class="badge badge-<%= post.type %>"><%= post.type %></span>
+    <span class="post-date">▲ <%= post.score || 0 %> · <%= post.created_at.slice(0, 10) %></span>
+  </div>
+
+  <h2><a href="/posts/<%= post.id %>"><%= post.title %></a></h2>
+
+  <% if (post.type === 'artwork') { %>
+    <a href="/posts/<%= post.id %>">
+      <img class="feed-image" src="<%= post.image %>" alt="<%= post.title %>">
+    </a>
+  <% } %>
+
+  <% if (post.body) { %>
+    <p class="feed-preview <%= post.type === 'poem' ? 'poem' : '' %>"><%= post.body.length > 220 ? post.body.slice(0, 220) + '…' : post.body %></p>
+  <% } %>
+
+  <div class="post-author">
+    <% if (post.avatar) { %>
+      <img class="avatar avatar-small" src="<%= post.avatar %>" alt="">
+    <% } else { %>
+      <div class="avatar avatar-small avatar-letter"><%= post.username.charAt(0).toUpperCase() %></div>
+    <% } %>
+    <a href="/u/<%= post.username %>"><%= post.display_name || post.username %></a>
+  </div>
+</article>

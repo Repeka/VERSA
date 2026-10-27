@@ -1,0 +1,20 @@
+<%- include('partials/header') %>
+
+<div class="profile-card">
+  <% if (profileUser.avatar) { %>
+    <img class="avatar avatar-big" src="<%= profileUser.avatar %>" alt="Avatar of <%= profileUser.username %>">
+  <% } else { %>
+    <div class="avatar avatar-big avatar-letter"><%= profileUser.username.charAt(0).toUpperCase() %></div>
+  <% } %>
+
+  <h1><%= profileUser.display_name || profileUser.username %></h1>
+  <p class="handle">@<%= profileUser.username %></p>
+  <p class="bio"><%= profileUser.bio || 'No bio yet.' %></p>
+  <p class="joined">Joined <%= profileUser.created_at.slice(0, 10) %></p>
+
+  <% if (isOwner) { %>
+    <a href="/profile/edit" class="btn btn-solid">Edit profile</a>
+  <% } %>
+</div>
+
+<%- include('partials/footer') %>

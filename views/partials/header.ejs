@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> · VERSA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="logo">VERSA</a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <% if (currentUser) { %>
+        <a href="/posts/new">+ New post</a>
+        <a href="/bookmarks">Saved</a>
+        <% if (currentUser.role === 'admin') { %><a href="/admin">Admin</a><% } %>
+        <a href="/u/<%= currentUser.username %>" class="nav-user">Hi, <%= currentUser.username %></a>
+        <form action="/logout" method="POST">
+          <button type="submit" class="btn btn-outline">Log out</button>
+        </form>
+      <% } else { %>
+        <a href="/login" class="btn btn-outline">Log in</a>
+        <a href="/signup" class="btn btn-solid">Sign up</a>
+      <% } %>
+    </div>
+  </nav>
+  <main class="container">

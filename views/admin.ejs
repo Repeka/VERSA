@@ -1,0 +1,83 @@
+<%- include('partials/header') %>
+<%- include('partials/admin-nav', { active: 'overview' }) %>
+
+<div class="stat-grid">
+  <div class="stat"><span class="stat-num"><%= stats.users %></span><span>Members</span></div>
+  <div class="stat"><span class="stat-num"><%= stats.posts %></span><span>Posts</span></div>
+  <div class="stat"><span class="stat-num"><%= stats.comments %></span><span>Comments</span></div>
+  <div class="stat"><a href="/admin/reports"><span class="stat-num"><%= stats.openReports %></span><span>Open reports</span></a></div>
+  <div class="stat"><a href="/admin/users"><span class="stat-num"><%= stats.banned %></span><span>Banned</span></a></div>
+</div>
+
+<div class="admin-grid">
+  <section class="admin-panel wide">
+    <h2>Sign-ups, last 14 days</h2>
+    <div class="bars">
+      <% days.forEach(function (d) { %>
+        <div class="bar-col" title="<%= d.day %>: <%= d.n %>">
+          <span class="bar-n"><%= d.n %></span>
+          <div class="bar" data-height="<%= Math.round((d.n / maxDay) * 100) %>"></div>
+          <span class="bar-day"><%= d.day.slice(5) %></span>
+        </div>
+      <% }) %>
+    </div>
+  </section>
+
+  <section class="admin-panel">
+    <h2>Most active members</h2>
+    <% if (activeUsers.length === 0) { %>
+      <p class="no-comments">No activity yet.</p>
+    <% } else { %>
+      <ul class="mini-list">
+        <% activeUsers.forEach(function (u) { %>
+          <li>
+            <a href="/u/<%= u.username %>">@<%= u.username %></a>
+            <span class="post-date"><%= u.posts %> posts · <%= u.comments %> comments</span>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </section>
+
+  <section class="admin-panel">
+    <h2>Popular posts</h2>
+    <% if (popularPosts.length === 0) { %>
+      <p class="no-comments">No posts yet.</p>
+    <% } else { %>
+      <ul class="mini-list">
+        <% popularPosts.forEach(function (p) { %>
+          <li>
+            <% if (p.is_hidden) { %>
+              <span><%= p.title %> (hidden)</span>
+            <% } else { %>
+              <a href="/posts/<%= p.id %>"><%= p.title %></a>
+            <% } %>
+            <span class="post-date">▲ <%= p.score %> · <%= p.comments %> 💬</span>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </section>
+
+  <section class="admin-panel">
+    <h2>Posts by type</h2>
+    <% if (byType.length === 0) { %>
+      <p class="no-comments">No posts yet.</p>
+    <% } else { %>
+      <ul class="mini-list">
+        <% byType.forEach(function (t) { %>
+          <li>
+            <span class="badge badge-<%= t.type %>"><%= t.type %></span>
+            <strong><%= t.n %></strong>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </section>
+</div>
+<script>
+  document.querySelectorAll('.bar').forEach(function (bar) {
+    bar.style.height = bar.dataset.height + 'px';
+  });
+</script>
+<%- include('partials/footer') %>

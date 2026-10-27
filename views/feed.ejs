@@ -1,0 +1,25 @@
+<%- include('partials/header') %>
+
+<div class="feed-header">
+  <h1>Fresh on VERSA</h1>
+  <a href="/posts/new" class="btn btn-solid">+ New post</a>
+</div>
+
+<div class="filter-tabs">
+  <a href="/" class="<%= type === 'all' ? 'active' : '' %>">All</a>
+  <a href="/?type=question" class="<%= type === 'question' ? 'active' : '' %>">Questions</a>
+  <a href="/?type=artwork" class="<%= type === 'artwork' ? 'active' : '' %>">Artwork</a>
+  <a href="/?type=poem" class="<%= type === 'poem' ? 'active' : '' %>">Poems</a>
+</div>
+
+<% if (posts.length === 0) { %>
+  <div class="empty">Nothing here yet. Be the first to share something!</div>
+<% } else { %>
+  <div class="feed">
+    <% posts.forEach(function (post) { %>
+      <%- include('partials/post-card', { post: post }) %>
+    <% }) %>
+  </div>
+<% } %>
+
+<%- include('partials/footer') %>

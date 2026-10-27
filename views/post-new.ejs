@@ -1,0 +1,42 @@
+<%- include('partials/header') %>
+
+<div class="auth-card">
+  <h1>New post</h1>
+
+  <div class="type-tabs">
+    <a href="/posts/new?type=question" class="<%= type === 'question' ? 'active' : '' %>">Question</a>
+    <a href="/posts/new?type=poem" class="<%= type === 'poem' ? 'active' : '' %>">Poem</a>
+    <a href="/posts/new?type=artwork" class="<%= type === 'artwork' ? 'active' : '' %>">Artwork</a>
+  </div>
+
+  <% if (error) { %>
+    <p class="error"><%= error %></p>
+  <% } %>
+
+  <form action="/posts" method="POST" enctype="multipart/form-data">
+    <input type="hidden" name="type" value="<%= type %>">
+
+    <label>Title</label>
+    <input type="text" name="title" maxlength="120" value="<%= form.title || '' %>" required>
+
+    <% if (type === 'question') { %>
+      <label>Details</label>
+      <textarea name="body" rows="6" placeholder="Explain your question. Be respectful and curious." required><%= form.body || '' %></textarea>
+
+    <% } else if (type === 'poem') { %>
+      <label>Your poem</label>
+      <textarea name="body" rows="10" placeholder="Write your poem here. Line breaks are kept." required><%= form.body || '' %></textarea>
+
+    <% } else { %>
+      <label>Image (png, jpg, gif or webp, up to 5 MB)</label>
+      <input type="file" name="image" accept="image/*" required>
+
+      <label>Description (optional)</label>
+      <textarea name="body" rows="4" placeholder="You can leave this empty."><%= form.body || '' %></textarea>
+    <% } %>
+
+    <button type="submit" class="btn btn-solid btn-big">Publish</button>
+  </form>
+</div>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,30 @@
+<%- include('partials/header') %>
+
+<div class="auth-card">
+  <h1>Edit profile</h1>
+  <% if (error) { %>
+    <p class="error"><%= error %></p>
+  <% } %>
+
+  <form action="/profile/edit" method="POST" enctype="multipart/form-data">
+    <% if (user.avatar) { %>
+      <img class="avatar avatar-big" src="<%= user.avatar %>" alt="Your avatar">
+    <% } else { %>
+      <div class="avatar avatar-big avatar-letter"><%= user.username.charAt(0).toUpperCase() %></div>
+    <% } %>
+
+    <label>Avatar (png, jpg, gif or webp, up to 2 MB)</label>
+    <input type="file" name="avatar" accept="image/*">
+
+    <label>Display name</label>
+    <input type="text" name="display_name" maxlength="40" value="<%= user.display_name || '' %>">
+
+    <label>Bio</label>
+    <textarea name="bio" rows="4" maxlength="300"><%= user.bio || '' %></textarea>
+
+    <button type="submit" class="btn btn-solid btn-big">Save changes</button>
+  </form>
+  <p class="auth-switch"><a href="/u/<%= user.username %>">Cancel</a></p>
+</div>
+
+<%- include('partials/footer') %>

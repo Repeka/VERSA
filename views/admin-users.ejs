@@ -1,0 +1,52 @@
+<%- include('partials/header') %>
+<%- include('partials/admin-nav', { active: 'users' }) %>
+
+<h2 class="admin-title">Members (<%= users.length %>)</h2>
+
+<div class="table-wrap">
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>User</th>
+        <th>Email</th>
+        <th>Posts</th>
+        <th>Comments</th>
+        <th>Joined</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% users.forEach(function (u) { %>
+        <tr>
+          <td>
+            <a href="/u/<%= u.username %>">@<%= u.username %></a>
+            <% if (u.role === 'admin') { %><span class="tag-admin">admin</span><% } %>
+          </td>
+          <td><%= u.email %></td>
+          <td><%= u.posts %></td>
+          <td><%= u.comments %></td>
+          <td><%= u.created_at.slice(0, 10) %></td>
+          <td>
+            <% if (u.is_banned) { %><span class="status-banned">Banned</span><% } else { %>Active<% } %>
+          </td>
+          <td>
+            <% if (u.role === 'admin' || u.id === currentUser.id) { %>
+              —
+            <% } else if (u.is_banned) { %>
+              <form action="/admin/users/<%= u.id %>/unban" method="POST">
+                <button type="submit" class="action-btn">Unban</button>
+              </form>
+            <% } else { %>
+              <form action="/admin/users/<%= u.id %>/ban" method="POST" onsubmit="return confirm('Ban @<%= u.username %>?');">
+                <button type="submit" class="btn-delete">Ban</button>
+              </form>
+            <% } %>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('partials/footer') %>

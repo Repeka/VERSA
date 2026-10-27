@@ -1,0 +1,9 @@
+@'
+node_modules/
+versa.db
+versa.db-journal
+versa.db-wal
+versa.db-shm
+public/uploads/
+.env
+'@ | Set-Content .gitignore
