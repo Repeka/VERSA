@@ -2,5 +2,24 @@
   <footer class="footer">
     <p>VERSA · a place for poems, art and questions</p>
   </footer>
+    <script>
+    document.querySelectorAll('.local-time').forEach(function (el) {
+      var d = new Date(el.dataset.iso);
+      if (!isNaN(d)) {
+        el.textContent = d.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+      }
+    });
+  </script>
+    <script>
+    (function () {
+      var toggle = document.querySelector('.nav-toggle');
+      var links = document.getElementById('nav-links');
+      if (!toggle || !links) return;
+      toggle.addEventListener('click', function () {
+        var open = links.classList.toggle('open');
+        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+    })();
+  </script>
 </body>
 </html>

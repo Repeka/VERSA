@@ -1,0 +1,32 @@
+<%- include('partials/header') %>
+
+<div class="feed-header">
+  <h1>Challenges</h1>
+  <% if (currentUser.role === 'admin') { %>
+    <a href="/challenges/new" class="btn btn-solid">+ New challenge</a>
+  <% } %>
+</div>
+
+<h2 class="admin-title">Open now</h2>
+<% if (open.length === 0) { %>
+  <div class="empty">No open challenges right now. Check back soon!</div>
+<% } else { %>
+  <div class="challenge-list">
+    <% open.forEach(function (c) { %>
+      <%- include('partials/challenge-card', { c: c }) %>
+    <% }) %>
+  </div>
+<% } %>
+
+<h2 class="admin-title">Finished</h2>
+<% if (closed.length === 0) { %>
+  <div class="empty">No finished challenges yet.</div>
+<% } else { %>
+  <div class="challenge-list">
+    <% closed.forEach(function (c) { %>
+      <%- include('partials/challenge-card', { c: c }) %>
+    <% }) %>
+  </div>
+<% } %>
+
+<%- include('partials/footer') %>

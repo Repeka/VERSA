@@ -1,0 +1,9 @@
+<a href="/challenges/<%= c.id %>" class="challenge-card <%= c.isOpen ? '' : 'challenge-closed' %>">
+  <span class="badge <%= c.isOpen ? 'badge-poem' : 'badge-question' %>"><%= c.isOpen ? 'Open' : 'Closed' %></span>
+  <h3><%= c.title %></h3>
+  <p class="post-date">
+    <%= c.isOpen ? 'Closes' : 'Closed' %>
+    <span class="local-time" data-iso="<%= c.deadline %>"><%= c.deadline %></span>
+    · <%= c.entries %> entr<%= c.entries === 1 ? 'y' : 'ies' %>
+  </p>
+</a>

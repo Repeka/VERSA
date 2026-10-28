@@ -118,4 +118,30 @@
   <% }) %>
 </section>
 
+<div class="actions actions-secondary">
+  <% if (!isOwner) { %>
+    <form action="/posts/<%= post.id %>/repost" method="POST">
+      <button type="submit" class="action-btn <%= reposted ? 'active' : '' %>">
+        🔁 <%= reposted ? 'Reposted' : 'Repost' %>
+      </button>
+    </form>
+
+    <form action="/posts/<%= post.id %>/interest" method="POST">
+      <input type="hidden" name="value" value="yes">
+      <button type="submit" class="action-btn <%= interest === 1 ? 'active' : '' %>">👍 Interested</button>
+    </form>
+
+    <form action="/posts/<%= post.id %>/interest" method="POST">
+      <input type="hidden" name="value" value="no">
+      <button type="submit" class="action-btn <%= interest === -1 ? 'active' : '' %>">🙈 Not interested</button>
+    </form>
+  <% } %>
+
+  <span class="post-date">
+    <%= repostCount %> repost<%= repostCount === 1 ? '' : 's' %> · <%= interestedCount %> interested
+  </span>
+</div>
+
+
+
 <%- include('partials/footer') %>

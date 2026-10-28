@@ -1,7 +1,10 @@
 <article class="feed-card feed-<%= post.type %>">
+    <% if (post.reposted_by) { %>
+    <p class="repost-label">🔁 @<%= post.reposted_by %> reposted</p>
+  <% } %>
   <div class="feed-top">
     <span class="badge badge-<%= post.type %>"><%= post.type %></span>
-    <span class="post-date">▲ <%= post.score || 0 %> · <%= post.created_at.slice(0, 10) %></span>
+    <span class="post-date">▲ <%= post.score || 0 %> · 💬 <%= post.comment_count || 0 %> · <%= post.created_at.slice(0, 10) %></span>
   </div>
 
   <h2><a href="/posts/<%= post.id %>"><%= post.title %></a></h2>
@@ -24,4 +27,11 @@
     <% } %>
     <a href="/u/<%= post.username %>"><%= post.display_name || post.username %></a>
   </div>
+    <% if (locals.showHide && post.username !== currentUser.username) { %>
+    <form action="/posts/<%= post.id %>/interest" method="POST" class="feed-hide">
+      <input type="hidden" name="value" value="no">
+      <input type="hidden" name="next" value="feed">
+      <button type="submit">🙈 Not interested</button>
+    </form>
+  <% } %>
 </article>

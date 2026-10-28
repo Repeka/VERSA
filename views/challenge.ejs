@@ -1,0 +1,112 @@
+<%- include('partials/header') %>
+
+<section class="challenge-head">
+  <span class="badge <%= isOpen ? 'badge-poem' : 'badge-question' %>"><%= isOpen ? 'Open' : 'Closed' %></span>
+  <h1><%= challenge.title %></h1>
+  <p class="post-date">
+    <%= isOpen ? 'Closes' : 'Closed' %>
+    <span class="local-time" data-iso="<%= challenge.deadline %>"><%= challenge.deadline %></span>
+  </p>
+
+  <h3>Rules</h3>
+  <p class="challenge-rules"><%= challenge.rules %></p>
+
+  <% if (isAdmin) { %>
+    <form action="/challenges/<%= challenge.id %>/delete" method="POST" onsubmit="return confirm('Delete this challenge and all its entries?');">
+      <button type="submit" class="btn-delete">Delete challenge</button>
+    </form>
+  <% } %>
+</section>
+
+<% if (winner) { %>
+  <div class="winner-banner">
+    🏆 Winner: <a href="/u/<%= winner.username %>">@<%= winner.username %></a>
+    with “<%= winner.title %>” · <%= winner.votes %> vote<%= winner.votes === 1 ? '' : 's' %>
+  </div>
+<% } else if (!isOpen) { %>
+  <div class="winner-banner muted">
+    <%= entries.length === 0 ? 'This challenge is closed. Nobody entered.' : 'This challenge is closed. There is no winner, because no votes were cast.' %>
+  </div>
+<% } %>
+
+<% if (isOpen) { %>
+  <% if (myEntry) { %>
+    <p class="notice">You have entered this challenge. You can withdraw your entry below and submit a new one before the deadline.</p>
+  <% } else { %>
+    <div class="auth-card submit-card">
+      <h2>Submit your entry</h2>
+      <% if (error) { %>
+        <p class="error"><%= error %></p>
+      <% } %>
+      <form action="/challenges/<%= challenge.id %>/submit" method="POST" enctype="multipart/form-data">
+        <label>Title</label>
+        <input type="text" name="title" maxlength="100" value="<%= form.title || '' %>" required>
+
+        <label>Your drawing (png, jpg, gif or webp, up to 5 MB)</label>
+        <input type="file" name="image" accept="image/*" required>
+
+        <label>Description (optional)</label>
+        <textarea name="description" rows="3" maxlength="500"><%= form.description || '' %></textarea>
+
+        <button type="submit" class="btn btn-solid btn-big">Submit entry</button>
+      </form>
+    </div>
+  <% } %>
+<% } %>
+
+<h2 class="admin-title">Entries (<%= entries.length %>)</h2>
+
+<% if (entries.length === 0) { %>
+  <div class="empty">No entries yet.</div>
+<% } %>
+
+<div class="entry-grid">
+  <% entries.forEach(function (e) { %>
+    <% const isWinner = winner && winner.id === e.id; %>
+    <article class="entry <%= isWinner ? 'entry-winner' : '' %>">
+      <% if (isWinner) { %><div class="crown">🏆 Winner</div><% } %>
+      <img src="<%= e.image %>" alt="<%= e.title %>">
+
+      <div class="entry-body">
+        <h3><%= e.title %></h3>
+        <% if (e.description) { %>
+          <p class="entry-desc"><%= e.description %></p>
+        <% } %>
+
+        <div class="post-author">
+          <% if (e.avatar) { %>
+            <img class="avatar avatar-small" src="<%= e.avatar %>" alt="">
+          <% } else { %>
+            <div class="avatar avatar-small avatar-letter"><%= e.username.charAt(0).toUpperCase() %></div>
+          <% } %>
+          <a href="/u/<%= e.username %>"><%= e.display_name || e.username %></a>
+        </div>
+
+        <div class="entry-actions">
+          <span class="score"><%= e.votes %> vote<%= e.votes === 1 ? '' : 's' %></span>
+
+          <% if (isOpen && e.user_id !== currentUser.id) { %>
+            <form action="/challenges/<%= challenge.id %>/vote" method="POST">
+              <input type="hidden" name="submission_id" value="<%= e.id %>">
+              <button type="submit" class="action-btn <%= myVoteId === e.id ? 'active' : '' %>">
+                <%= myVoteId === e.id ? '✓ Voted' : 'Vote' %>
+              </button>
+            </form>
+          <% } %>
+
+          <% if (e.user_id === currentUser.id) { %>
+            <span class="post-date">Your entry</span>
+          <% } %>
+
+          <% if ((e.user_id === currentUser.id && isOpen) || (isAdmin && e.user_id !== currentUser.id)) { %>
+            <form action="/submissions/<%= e.id %>/delete" method="POST" onsubmit="return confirm('Remove this entry?');">
+              <button type="submit" class="btn-delete"><%= e.user_id === currentUser.id ? 'Withdraw' : 'Remove' %></button>
+            </form>
+          <% } %>
+        </div>
+      </div>
+    </article>
+  <% }) %>
+</div>
+
+<%- include('partials/footer') %>

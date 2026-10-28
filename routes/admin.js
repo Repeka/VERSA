@@ -25,6 +25,8 @@ function deletePost(postId) {
   db.prepare('DELETE FROM votes WHERE post_id = ?').run(postId);
   db.prepare('DELETE FROM bookmarks WHERE post_id = ?').run(postId);
   db.prepare('DELETE FROM reports WHERE post_id = ?').run(postId);
+db.prepare('DELETE FROM reposts WHERE post_id = ?').run(postId);
+db.prepare('DELETE FROM interests WHERE post_id = ?').run(postId);
   db.prepare('DELETE FROM posts WHERE id = ?').run(postId);
 }
 

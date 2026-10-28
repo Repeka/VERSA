@@ -1,0 +1,34 @@
+<%- include('partials/header') %>
+
+<div class="auth-card">
+  <h1>New challenge</h1>
+  <% if (error) { %>
+    <p class="error"><%= error %></p>
+  <% } %>
+
+  <form action="/challenges" method="POST" id="challenge-form">
+    <label>Title</label>
+    <input type="text" name="title" maxlength="100" value="<%= form.title || '' %>" placeholder="Draw your favorite animal" required>
+
+    <label>Rules</label>
+    <textarea name="rules" rows="6" maxlength="2000" placeholder="What should people draw? Any limits on style or size? One entry per person." required><%= form.rules || '' %></textarea>
+
+    <label>Deadline (in your local time)</label>
+    <input type="datetime-local" id="deadline-local" required>
+    <input type="hidden" name="deadline" id="deadline-iso">
+
+    <button type="submit" class="btn btn-solid btn-big">Create challenge</button>
+  </form>
+  <p class="auth-switch"><a href="/challenges">Cancel</a></p>
+</div>
+
+<script>
+  document.getElementById('challenge-form').addEventListener('submit', function () {
+    var value = document.getElementById('deadline-local').value;
+    if (value) {
+      document.getElementById('deadline-iso').value = new Date(value).toISOString();
+    }
+  });
+</script>
+
+<%- include('partials/footer') %>

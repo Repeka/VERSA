@@ -10,11 +10,61 @@
   <h1><%= profileUser.display_name || profileUser.username %></h1>
   <p class="handle">@<%= profileUser.username %></p>
   <p class="bio"><%= profileUser.bio || 'No bio yet.' %></p>
+
+  <div class="profile-stats">
+    <div><strong><%= stats.posts %></strong><span>Posts</span></div>
+    <div><strong><%= stats.votes %></strong><span>Votes</span></div>
+    <div><strong><%= stats.comments %></strong><span>Comments received</span></div>
+  </div>
+
   <p class="joined">Joined <%= profileUser.created_at.slice(0, 10) %></p>
 
   <% if (isOwner) { %>
     <a href="/profile/edit" class="btn btn-solid">Edit profile</a>
   <% } %>
 </div>
+
+<% if (isOwner) { %>
+  <section class="admin-panel profile-panel">
+    <h2>Latest comments on your posts</h2>
+    <% if (recentComments.length === 0) { %>
+      <p class="no-comments">No comments from other members yet.</p>
+    <% } else { %>
+      <ul class="mini-list">
+        <% recentComments.forEach(function (c) { %>
+          <li>
+            <div>
+              <a href="/u/<%= c.username %>">@<%= c.username %></a> on
+              <a href="/posts/<%= c.post_id %>#comment-<%= c.id %>"><%= c.post_title %></a>
+              <p class="comment-snippet">“<%= c.body.length > 120 ? c.body.slice(0, 120) + '…' : c.body %>”</p>
+            </div>
+            <span class="post-date"><%= c.created_at.slice(0, 10) %></span>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </section>
+<% } %>
+
+<h2 class="admin-title profile-heading"><%= isOwner ? 'Your posts' : 'Posts' %></h2>
+
+<div class="filter-tabs">
+  <a href="/u/<%= profileUser.username %>" class="<%= type === 'all' ? 'active' : '' %>">All</a>
+  <a href="/u/<%= profileUser.username %>?type=question" class="<%= type === 'question' ? 'active' : '' %>">Questions</a>
+  <a href="/u/<%= profileUser.username %>?type=artwork" class="<%= type === 'artwork' ? 'active' : '' %>">Artwork</a>
+  <a href="/u/<%= profileUser.username %>?type=poem" class="<%= type === 'poem' ? 'active' : '' %>">Poems</a>
+</div>
+
+<% if (posts.length === 0) { %>
+  <div class="empty">
+    <%= isOwner ? 'You have not posted anything here yet.' : 'Nothing here yet.' %>
+  </div>
+<% } else { %>
+  <div class="feed">
+    <% posts.forEach(function (post) { %>
+      <%- include('partials/post-card', { post: post }) %>
+    <% }) %>
+  </div>
+<% } %>
 
 <%- include('partials/footer') %>

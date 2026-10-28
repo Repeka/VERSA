@@ -110,6 +110,8 @@ app.use(require('./routes/feed'));
 app.use(require('./routes/comments'));
 app.use(require('./routes/interactions'));
 app.use(require('./routes/admin'));
+app.use(require('./routes/challenges'));
+app.use(require('./routes/extras'));
 app.listen(PORT, () => {
   console.log(`VERSA is running at http://localhost:${PORT}`);
 });

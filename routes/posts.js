@@ -118,6 +118,19 @@ router.get('/posts/:id', requireLogin, (req, res) => {
     .prepare('SELECT 1 FROM reports WHERE post_id = ? AND reporter_id = ?')
     .get(post.id, userId);
 
+    const repostCount = db
+  .prepare('SELECT COUNT(*) AS n FROM reposts WHERE post_id = ?')
+  .get(post.id).n;
+const reposted = !!db
+  .prepare('SELECT 1 FROM reposts WHERE post_id = ? AND user_id = ?')
+  .get(post.id, userId);
+const interestedCount = db
+  .prepare('SELECT COUNT(*) AS n FROM interests WHERE post_id = ? AND value = 1')
+  .get(post.id).n;
+const myInterest = db
+  .prepare('SELECT value FROM interests WHERE post_id = ? AND user_id = ?')
+  .get(post.id, userId);
+
   res.render('post', {
     title: post.title,
     post,
@@ -127,6 +140,10 @@ router.get('/posts/:id', requireLogin, (req, res) => {
     bookmarked,
     reported,
     justReported: req.query.reported === '1',
+    repostCount,
+reposted,
+interestedCount,
+interest: myInterest ? myInterest.value : 0,
     isOwner: post.user_id === userId
   });
 });
@@ -144,6 +161,8 @@ router.post('/posts/:id/delete', requireLogin, (req, res) => {
   db.prepare('DELETE FROM votes WHERE post_id = ?').run(post.id);
 db.prepare('DELETE FROM bookmarks WHERE post_id = ?').run(post.id);
 db.prepare('DELETE FROM reports WHERE post_id = ?').run(post.id);
+db.prepare('DELETE FROM reposts WHERE post_id = ?').run(post.id);
+db.prepare('DELETE FROM interests WHERE post_id = ?').run(post.id);
   db.prepare('DELETE FROM posts WHERE id = ?').run(post.id);
   res.redirect('/u/' + res.locals.currentUser.username);
 });

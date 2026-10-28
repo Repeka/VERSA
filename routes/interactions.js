@@ -89,7 +89,8 @@ router.get('/bookmarks', requireLogin, (req, res) => {
     .prepare(`
       SELECT posts.id, posts.type, posts.title, posts.body, posts.image, posts.created_at,
              users.username, users.display_name, users.avatar,
-             (SELECT COALESCE(SUM(value), 0) FROM votes WHERE votes.post_id = posts.id) AS score
+             (SELECT COALESCE(SUM(value), 0) FROM votes WHERE votes.post_id = posts.id) AS score,
+             (SELECT COUNT(*) FROM comments WHERE comments.post_id = posts.id AND comments.is_hidden = 0) AS comment_count
       FROM bookmarks
       JOIN posts ON posts.id = bookmarks.post_id
       JOIN users ON users.id = posts.user_id

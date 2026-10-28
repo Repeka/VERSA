@@ -17,7 +17,7 @@
 <% } else { %>
   <div class="feed">
     <% posts.forEach(function (post) { %>
-      <%- include('partials/post-card', { post: post }) %>
+      <%- include('partials/post-card', { post: post, showHide: true }) %>
     <% }) %>
   </div>
 <% } %>
