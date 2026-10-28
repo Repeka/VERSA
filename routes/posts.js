@@ -29,6 +29,18 @@ const upload = multer({
 });
 
 const TYPES = ['question', 'artwork', 'poem'];
+// Turn "Love, #Nature  life" into ['love', 'nature', 'life'] (max 5 tags)
+function parseTags(text) {
+  const found = new Set();
+  String(text || '')
+    .toLowerCase()
+    .split(/[\s,]+/)
+    .map((t) => t.replace(/^#+/, ''))
+    .forEach((t) => {
+      if (/^[\p{L}\p{N}_-]{2,24}$/u.test(t)) found.add(t);
+    });
+  return [...found].slice(0, 5);
+}
 
 function requireLogin(req, res, next) {
   if (!res.locals.currentUser) return res.redirect('/login');
@@ -46,7 +58,7 @@ router.post('/posts', requireLogin, (req, res) => {
   upload.single('image')(req, res, (err) => {
     const data = req.body || {};
     const type = TYPES.includes(data.type) ? data.type : 'question';
-    const form = { title: data.title || '', body: data.body || '' };
+        const form = { title: data.title || '', body: data.body || '', tags: data.tags || '' };
 
     const fail = (msg) => {
       if (req.file) fs.unlink(req.file.path, () => {});
@@ -74,7 +86,8 @@ router.post('/posts', requireLogin, (req, res) => {
     const result = db
       .prepare('INSERT INTO posts (user_id, type, title, body, image) VALUES (?, ?, ?, ?, ?)')
       .run(req.session.userId, type, postTitle, body, image);
-
+    const addTag = db.prepare('INSERT OR IGNORE INTO post_tags (post_id, tag) VALUES (?, ?)');
+    parseTags(data.tags).forEach((tag) => addTag.run(result.lastInsertRowid, tag));
     res.redirect('/posts/' + result.lastInsertRowid);
   });
 });
@@ -86,7 +99,7 @@ router.get('/posts/:id', requireLogin, (req, res) => {
       SELECT posts.*, users.username, users.display_name, users.avatar
       FROM posts
       JOIN users ON users.id = posts.user_id
-      WHERE posts.id = ? AND posts.is_hidden = 0
+            WHERE posts.id = ? AND (posts.is_hidden = 0 OR ${res.locals.currentUser.role === 'admin' ? 1 : 0} = 1)
     `)
     .get(req.params.id);
 
@@ -164,6 +177,7 @@ db.prepare('DELETE FROM reports WHERE post_id = ?').run(post.id);
 db.prepare('DELETE FROM reposts WHERE post_id = ?').run(post.id);
 db.prepare('DELETE FROM interests WHERE post_id = ?').run(post.id);
   db.prepare('DELETE FROM posts WHERE id = ?').run(post.id);
+  db.prepare('DELETE FROM post_tags WHERE post_id = ?').run(post.id);
   res.redirect('/u/' + res.locals.currentUser.username);
 });
 

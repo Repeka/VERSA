@@ -23,6 +23,11 @@ app.use(session({
 // Make the logged-in user available to every page as "currentUser"
 app.use((req, res, next) => {
   res.locals.currentUser = null;
+   res.locals.tagsFor = (postId) =>
+    db
+      .prepare('SELECT tag FROM post_tags WHERE post_id = ? ORDER BY tag')
+      .all(postId)
+      .map((r) => r.tag); 
   if (req.session.userId) {
     const user = db
       .prepare('SELECT id, username, role, is_banned FROM users WHERE id = ?')
@@ -112,6 +117,9 @@ app.use(require('./routes/interactions'));
 app.use(require('./routes/admin'));
 app.use(require('./routes/challenges'));
 app.use(require('./routes/extras'));
+app.use(require('./routes/follows'));
+app.use(require('./routes/search'));
+app.use(require('./routes/tags'));
 app.listen(PORT, () => {
   console.log(`VERSA is running at http://localhost:${PORT}`);
 });

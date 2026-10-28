@@ -134,5 +134,24 @@ db.exec(`
     UNIQUE (post_id, user_id)
   );
 `);
+// Who follows whom
+db.exec(`
+  CREATE TABLE IF NOT EXISTS follows (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    follower_id INTEGER NOT NULL,
+    followed_id INTEGER NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (follower_id, followed_id)
+  )
+`);
+// Tags on posts
+db.exec(`
+  CREATE TABLE IF NOT EXISTS post_tags (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    post_id INTEGER NOT NULL,
+    tag TEXT NOT NULL,
+    UNIQUE (post_id, tag)
+  )
+`);
 
 module.exports = db;

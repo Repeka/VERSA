@@ -1,0 +1,50 @@
+<%- include('partials/header') %>
+
+<div class="feed-header">
+  <h1><%= mode === 'followers' ? 'Followers' : 'Following' %></h1>
+  <a href="/u/<%= person.username %>" class="btn btn-solid">← @<%= person.username %></a>
+</div>
+
+<div class="filter-tabs">
+  <a href="/u/<%= person.username %>/followers" class="<%= mode === 'followers' ? 'active' : '' %>">Followers</a>
+  <a href="/u/<%= person.username %>/following" class="<%= mode === 'following' ? 'active' : '' %>">Following</a>
+</div>
+
+<% if (people.length === 0) { %>
+  <div class="empty">
+    <%= mode === 'followers' ? 'No followers yet.' : 'Not following anyone yet.' %>
+  </div>
+<% } else { %>
+  <div class="people-list">
+    <% people.forEach(function (p) { %>
+      <div class="person">
+        <% if (p.avatar) { %>
+          <img class="avatar avatar-small" src="<%= p.avatar %>" alt="">
+        <% } else { %>
+          <div class="avatar avatar-small avatar-letter"><%= p.username.charAt(0).toUpperCase() %></div>
+        <% } %>
+
+        <div class="person-info">
+          <a href="/u/<%= p.username %>"><%= p.display_name || p.username %></a>
+          <span class="post-date">@<%= p.username %></span>
+          <% if (p.bio) { %>
+            <p class="person-bio"><%= p.bio.length > 90 ? p.bio.slice(0, 90) + '…' : p.bio %></p>
+          <% } %>
+        </div>
+
+        <% if (!p.isMe) { %>
+          <form action="/u/<%= p.username %>/follow" method="POST">
+            <input type="hidden" name="back" value="/u/<%= person.username %>/<%= mode %>">
+            <button type="submit" class="action-btn <%= p.isFollowing ? 'active' : '' %>">
+              <%= p.isFollowing ? '✓ Following' : '+ Follow' %>
+            </button>
+          </form>
+        <% } else { %>
+          <span class="post-date">You</span>
+        <% } %>
+      </div>
+    <% }) %>
+  </div>
+<% } %>
+
+<%- include('partials/footer') %>

@@ -34,7 +34,8 @@
       <label>Description (optional)</label>
       <textarea name="body" rows="4" placeholder="You can leave this empty."><%= form.body || '' %></textarea>
     <% } %>
-
+    <label>Tags (optional)</label>
+    <input type="text" name="tags" maxlength="120" value="<%= form.tags || '' %>" placeholder="love, nature, life (up to 5, separated by commas)">
     <button type="submit" class="btn btn-solid btn-big">Publish</button>
   </form>
 </div>

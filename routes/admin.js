@@ -14,6 +14,17 @@ function requireAdmin(req, res, next) {
 }
 router.use('/admin', requireAdmin);
 
+// Where to go after a moderation action (forms can send a "back" value)
+function backTo(req, fallback) {
+  const back = (req.body || {}).back;
+  if (back === 'posts') return '/admin/posts';
+  if (back === 'reports') return '/admin/reports';
+  if (back === 'users') return '/admin/users';
+  if (back === 'feed') return '/';
+  if (back === 'post') return '/posts/' + req.params.id;
+  return fallback;
+}
+
 // Delete a post and everything attached to it
 function deletePost(postId) {
   const post = db.prepare('SELECT * FROM posts WHERE id = ?').get(postId);
@@ -25,8 +36,9 @@ function deletePost(postId) {
   db.prepare('DELETE FROM votes WHERE post_id = ?').run(postId);
   db.prepare('DELETE FROM bookmarks WHERE post_id = ?').run(postId);
   db.prepare('DELETE FROM reports WHERE post_id = ?').run(postId);
-db.prepare('DELETE FROM reposts WHERE post_id = ?').run(postId);
-db.prepare('DELETE FROM interests WHERE post_id = ?').run(postId);
+  db.prepare('DELETE FROM reposts WHERE post_id = ?').run(postId);
+  db.prepare('DELETE FROM interests WHERE post_id = ?').run(postId);
+    db.prepare('DELETE FROM post_tags WHERE post_id = ?').run(postId);
   db.prepare('DELETE FROM posts WHERE id = ?').run(postId);
 }
 
@@ -36,8 +48,7 @@ function setBan(req, res, value) {
   if (target && target.role !== 'admin' && target.id !== res.locals.currentUser.id) {
     db.prepare('UPDATE users SET is_banned = ? WHERE id = ?').run(value, target.id);
   }
-  const back = (req.body || {}).back === 'reports' ? '/admin/reports' : '/admin/users';
-  res.redirect(back);
+  res.redirect(backTo(req, '/admin/users'));
 }
 
 // Overview
@@ -105,6 +116,32 @@ router.get('/admin', (req, res) => {
   });
 });
 
+// All posts, with moderation buttons
+router.get('/admin/posts', (req, res) => {
+  const show = ['visible', 'hidden'].includes(req.query.show) ? req.query.show : 'all';
+  const where =
+    show === 'visible' ? 'WHERE posts.is_hidden = 0' :
+    show === 'hidden' ? 'WHERE posts.is_hidden = 1' : '';
+
+  const posts = db
+    .prepare(`
+      SELECT posts.id, posts.title, posts.type, posts.is_hidden, posts.created_at, posts.user_id,
+             users.username, users.is_banned, users.role,
+             COALESCE((SELECT SUM(value) FROM votes WHERE votes.post_id = posts.id), 0) AS score,
+             (SELECT COUNT(*) FROM comments WHERE comments.post_id = posts.id) AS comments,
+             (SELECT COUNT(*) FROM reports
+                WHERE reports.post_id = posts.id AND reports.status = 'open') AS open_reports
+      FROM posts
+      JOIN users ON users.id = posts.user_id
+      ${where}
+      ORDER BY posts.id DESC
+      LIMIT 100
+    `)
+    .all();
+
+  res.render('admin-posts', { title: 'Admin · Posts', posts, show });
+});
+
 // Reports and hidden posts
 router.get('/admin/reports', (req, res) => {
   const reportedPosts = db
@@ -162,17 +199,17 @@ router.post('/admin/posts/:id/hide', (req, res) => {
   db.prepare('UPDATE posts SET is_hidden = 1 WHERE id = ?').run(req.params.id);
   db.prepare("UPDATE reports SET status = 'resolved' WHERE post_id = ? AND status = 'open'")
     .run(req.params.id);
-  res.redirect('/admin/reports');
+  res.redirect(backTo(req, '/admin/reports'));
 });
 
 router.post('/admin/posts/:id/unhide', (req, res) => {
   db.prepare('UPDATE posts SET is_hidden = 0 WHERE id = ?').run(req.params.id);
-  res.redirect('/admin/reports');
+  res.redirect(backTo(req, '/admin/reports'));
 });
 
 router.post('/admin/posts/:id/delete', (req, res) => {
   deletePost(req.params.id);
-  res.redirect('/admin/reports');
+  res.redirect(backTo(req, '/admin/reports'));
 });
 
 router.post('/admin/reports/:postId/dismiss', (req, res) => {

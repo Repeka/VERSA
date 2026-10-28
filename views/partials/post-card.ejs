@@ -8,6 +8,14 @@
   </div>
 
   <h2><a href="/posts/<%= post.id %>"><%= post.title %></a></h2>
+    <% const cardTags = tagsFor(post.id); %>
+  <% if (cardTags.length > 0) { %>
+    <div class="tag-list">
+      <% cardTags.forEach(function (t) { %>
+        <a href="/tags/<%= encodeURIComponent(t) %>" class="tag">#<%= t %></a>
+      <% }) %>
+    </div>
+  <% } %>
 
   <% if (post.type === 'artwork') { %>
     <a href="/posts/<%= post.id %>">

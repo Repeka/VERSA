@@ -433,3 +433,76 @@ a.nav-user:hover { text-decoration: underline; }
   .bar-n, .bar-day { font-size: 0.55rem; }
 }
 
+/* Follows */
+.profile-stats a { display: flex; flex-direction: column; text-decoration: none; }
+.profile-stats a:hover strong { text-decoration: underline; }
+
+.profile-card form { margin: 0; }
+.profile-card .btn-follow { cursor: pointer; }
+.profile-card .btn-follow.following {
+  background: white; color: var(--purple) !important; border: 2px solid var(--purple);
+}
+
+.people-list { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+.person {
+  display: flex; align-items: center; gap: 14px; background: white;
+  padding: 14px 18px; border-radius: 18px; box-shadow: 0 4px 16px rgba(108, 79, 245, 0.08);
+}
+.person .avatar-small { width: 48px; height: 48px; flex-shrink: 0; }
+.person .avatar-small.avatar-letter { font-size: 1.3rem; }
+.person-info { flex: 1; min-width: 0; }
+.person-info a { color: var(--dark); font-weight: 600; text-decoration: none; margin-right: 6px; }
+.person-info a:hover { color: var(--purple); }
+.person-bio { color: #4a4562; font-size: 0.9rem; margin-top: 4px; }
+.person form { margin: 0; }
+
+/* Search */
+.navbar { flex-wrap: wrap; row-gap: 8px; }
+.nav-links { flex-wrap: wrap; justify-content: flex-end; row-gap: 8px; }
+
+.nav-search { margin: 0; }
+.nav-search input {
+  width: 150px; padding: 7px 14px; border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.6); background: rgba(255, 255, 255, 0.15);
+  color: white; font-family: inherit; font-size: 0.95rem;
+}
+.nav-search input::placeholder { color: rgba(255, 255, 255, 0.8); }
+.nav-search input:focus { outline: none; width: 190px; background: white; color: var(--dark); border-color: white; }
+
+.search-page-form { max-width: 720px; margin: 0 auto 10px; display: flex; gap: 10px; }
+.search-page-form input {
+  flex: 1; min-width: 0; padding: 12px 18px; font-size: 1rem; font-family: inherit;
+  border: 2px solid #e4def7; border-radius: 999px;
+}
+.search-page-form input:focus { outline: none; border-color: var(--purple); }
+.search-page-form .btn-solid { background: var(--purple); color: white !important; cursor: pointer; }
+
+@media (max-width: 800px) {
+  .nav-search, .nav-search input, .nav-search input:focus { width: 100%; }
+}
+
+/* Admin tools on posts */
+.admin-bar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  background: #fff4e5; border: 2px dashed var(--orange);
+  padding: 10px 14px; border-radius: 14px; margin-bottom: 16px;
+}
+.admin-bar form { margin: 0; }
+.admin-bar .btn-delete { margin-top: 0; padding: 6px 14px; }
+.admin-bar .action-btn { padding: 6px 14px; }
+
+.admin-filter { margin-left: 0; }
+.admin-table-wide { min-width: 900px; }
+
+/* Tags */
+.tag-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 14px; }
+.tag {
+  display: inline-block; padding: 4px 12px; border-radius: 999px;
+  background: #efeaff; color: var(--purple); font-size: 0.85rem; font-weight: 600; text-decoration: none;
+}
+.tag:hover { background: var(--purple); color: white; }
+.tag small { opacity: 0.7; margin-left: 4px; }
+.tag-more { background: transparent; border: 2px solid #e4def7; }
+.tag-strip { max-width: 720px; margin: 0 auto 18px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.tags-cloud { max-width: 720px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 10px; }
+

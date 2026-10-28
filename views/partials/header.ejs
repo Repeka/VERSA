@@ -15,6 +15,9 @@
    <div class="nav-links" id="nav-links">
       <a href="/">Home</a>
       <% if (currentUser) { %>
+        <form action="/search" method="GET" class="nav-search">
+  <input type="search" name="q" placeholder="Search VERSA" maxlength="60" aria-label="Search">
+</form>
         <a href="/posts/new">+ New post</a>
         <a href="/bookmarks">Saved</a>
         <a href="/challenges">Challenges</a>

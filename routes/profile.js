@@ -93,6 +93,15 @@ router.get('/u/:username', requireLogin, (req, res) => {
       `)
       .all(me.id, me.id);
   }
+const followerCount = db
+  .prepare('SELECT COUNT(*) AS n FROM follows WHERE followed_id = ?')
+  .get(profileUser.id).n;
+const followingCount = db
+  .prepare('SELECT COUNT(*) AS n FROM follows WHERE follower_id = ?')
+  .get(profileUser.id).n;
+const isFollowing = !!db
+  .prepare('SELECT 1 FROM follows WHERE follower_id = ? AND followed_id = ?')
+  .get(me.id, profileUser.id);
 
   res.render('profile', {
     title: profileUser.username,
@@ -101,6 +110,9 @@ router.get('/u/:username', requireLogin, (req, res) => {
     posts,
     stats,
     type,
+        followerCount,
+    followingCount,
+    isFollowing,
     recentComments
   });
 });

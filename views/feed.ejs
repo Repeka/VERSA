@@ -6,14 +6,27 @@
 </div>
 
 <div class="filter-tabs">
-  <a href="/" class="<%= type === 'all' ? 'active' : '' %>">All</a>
+  <a href="/" class="<%= (type === 'all' && !following) ? 'active' : '' %>">All</a>
+  <a href="/?feed=following" class="<%= following ? 'active' : '' %>">Following</a>
   <a href="/?type=question" class="<%= type === 'question' ? 'active' : '' %>">Questions</a>
   <a href="/?type=artwork" class="<%= type === 'artwork' ? 'active' : '' %>">Artwork</a>
   <a href="/?type=poem" class="<%= type === 'poem' ? 'active' : '' %>">Poems</a>
 </div>
 
+<% if (popularTags.length > 0) { %>
+  <div class="tag-strip">
+    <span class="post-date">Popular tags:</span>
+    <% popularTags.forEach(function (t) { %>
+      <a href="/tags/<%= encodeURIComponent(t.tag) %>" class="tag">#<%= t.tag %></a>
+    <% }) %>
+    <a href="/tags" class="tag tag-more">All tags →</a>
+  </div>
+<% } %>
+
 <% if (posts.length === 0) { %>
-  <div class="empty">Nothing here yet. Be the first to share something!</div>
+  <div class="empty">
+    <%= following ? 'Nothing from people you follow yet. Visit a profile and press Follow!' : 'Nothing here yet. Be the first to share something!' %>
+  </div>
 <% } else { %>
   <div class="feed">
     <% posts.forEach(function (post) { %>

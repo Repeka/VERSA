@@ -1,6 +1,27 @@
 <%- include('partials/header') %>
 
 <article class="post">
+  <% if (currentUser.role === 'admin') { %>
+  <div class="admin-bar">
+    <strong>Admin</strong>
+    <% if (post.is_hidden) { %>
+      <span class="status-banned">This post is hidden from everyone else.</span>
+      <form action="/admin/posts/<%= post.id %>/unhide" method="POST">
+        <input type="hidden" name="back" value="post">
+        <button type="submit" class="action-btn">Unhide</button>
+      </form>
+    <% } else { %>
+      <form action="/admin/posts/<%= post.id %>/hide" method="POST" onsubmit="return confirm('Hide this post from everyone?');">
+        <input type="hidden" name="back" value="feed">
+        <button type="submit" class="action-btn">Hide post</button>
+      </form>
+    <% } %>
+    <form action="/admin/posts/<%= post.id %>/delete" method="POST" onsubmit="return confirm('Delete this post for good?');">
+      <input type="hidden" name="back" value="feed">
+      <button type="submit" class="btn-delete">Delete post</button>
+    </form>
+  </div>
+<% } %>
   <span class="badge badge-<%= post.type %>"><%= post.type %></span>
   <h1><%= post.title %></h1>
 
@@ -13,6 +34,15 @@
     <a href="/u/<%= post.username %>"><%= post.display_name || post.username %></a>
     <span class="post-date">· <%= post.created_at.slice(0, 10) %></span>
   </div>
+
+  <% const postTags = tagsFor(post.id); %>
+  <% if (postTags.length > 0) { %>
+    <div class="tag-list">
+      <% postTags.forEach(function (t) { %>
+        <a href="/tags/<%= encodeURIComponent(t) %>" class="tag">#<%= t %></a>
+      <% }) %>
+    </div>
+  <% } %>
 
   <% if (post.type === 'artwork') { %>
     <img class="post-image" src="<%= post.image %>" alt="<%= post.title %>">

@@ -15,12 +15,20 @@
     <div><strong><%= stats.posts %></strong><span>Posts</span></div>
     <div><strong><%= stats.votes %></strong><span>Votes</span></div>
     <div><strong><%= stats.comments %></strong><span>Comments received</span></div>
+    <a href="/u/<%= profileUser.username %>/followers" class="stat-link"><strong><%= followerCount %></strong><span>Followers</span></a>
+<a href="/u/<%= profileUser.username %>/following" class="stat-link"><strong><%= followingCount %></strong><span>Following</span></a>
   </div>
 
   <p class="joined">Joined <%= profileUser.created_at.slice(0, 10) %></p>
 
-  <% if (isOwner) { %>
+    <% if (isOwner) { %>
     <a href="/profile/edit" class="btn btn-solid">Edit profile</a>
+  <% } else { %>
+    <form action="/u/<%= profileUser.username %>/follow" method="POST">
+      <button type="submit" class="btn btn-solid btn-follow <%= isFollowing ? 'following' : '' %>">
+        <%= isFollowing ? '✓ Following' : '+ Follow' %>
+      </button>
+    </form>
   <% } %>
 </div>
 

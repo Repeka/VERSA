@@ -1,0 +1,18 @@
+<%- include('partials/header') %>
+
+<div class="feed-header">
+  <h1>Tags</h1>
+  <a href="/" class="btn btn-solid">← Home</a>
+</div>
+
+<% if (tags.length === 0) { %>
+  <div class="empty">No tags yet. Add some when you publish a post!</div>
+<% } else { %>
+  <div class="tags-cloud">
+    <% tags.forEach(function (t) { %>
+      <a href="/tags/<%= encodeURIComponent(t.tag) %>" class="tag">#<%= t.tag %> <small><%= t.n %></small></a>
+    <% }) %>
+  </div>
+<% } %>
+
+<%- include('partials/footer') %>

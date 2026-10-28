@@ -1,0 +1,57 @@
+<%- include('partials/header') %>
+
+<div class="feed-header">
+  <h1>Search</h1>
+</div>
+
+<form action="/search" method="GET" class="search-page-form">
+  <input type="search" name="q" value="<%= q %>" placeholder="Search posts and members" maxlength="60" required>
+  <button type="submit" class="btn btn-solid">Search</button>
+</form>
+
+<% if (!q) { %>
+  <div class="empty">Type a word or a name to find posts and members.</div>
+
+<% } else if (tooShort) { %>
+  <div class="empty">Please type at least 2 letters.</div>
+
+<% } else { %>
+
+  <h2 class="admin-title profile-heading">Members (<%= people.length %>)</h2>
+  <% if (people.length === 0) { %>
+    <div class="empty">No members match “<%= q %>”.</div>
+  <% } else { %>
+    <div class="people-list">
+      <% people.forEach(function (p) { %>
+        <div class="person">
+          <% if (p.avatar) { %>
+            <img class="avatar avatar-small" src="<%= p.avatar %>" alt="">
+          <% } else { %>
+            <div class="avatar avatar-small avatar-letter"><%= p.username.charAt(0).toUpperCase() %></div>
+          <% } %>
+          <div class="person-info">
+            <a href="/u/<%= p.username %>"><%= p.display_name || p.username %></a>
+            <span class="post-date">@<%= p.username %></span>
+            <% if (p.bio) { %>
+              <p class="person-bio"><%= p.bio.length > 90 ? p.bio.slice(0, 90) + '…' : p.bio %></p>
+            <% } %>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+
+  <h2 class="admin-title profile-heading">Posts (<%= posts.length %>)</h2>
+  <% if (posts.length === 0) { %>
+    <div class="empty">No posts match “<%= q %>”.</div>
+  <% } else { %>
+    <div class="feed">
+      <% posts.forEach(function (post) { %>
+        <%- include('partials/post-card', { post: post }) %>
+      <% }) %>
+    </div>
+  <% } %>
+
+<% } %>
+
+<%- include('partials/footer') %>

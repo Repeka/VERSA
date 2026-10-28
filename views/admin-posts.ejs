@@ -1,0 +1,84 @@
+<%- include('partials/header') %>
+<%- include('partials/admin-nav', { active: 'posts' }) %>
+
+<h2 class="admin-title">Posts (<%= posts.length %>)</h2>
+
+<div class="filter-tabs admin-filter">
+  <a href="/admin/posts" class="<%= show === 'all' ? 'active' : '' %>">All</a>
+  <a href="/admin/posts?show=visible" class="<%= show === 'visible' ? 'active' : '' %>">Visible</a>
+  <a href="/admin/posts?show=hidden" class="<%= show === 'hidden' ? 'active' : '' %>">Hidden</a>
+</div>
+
+<% if (posts.length === 0) { %>
+  <div class="empty">No posts here.</div>
+<% } else { %>
+  <div class="table-wrap">
+    <table class="admin-table admin-table-wide">
+      <thead>
+        <tr>
+          <th>Post</th>
+          <th>Author</th>
+          <th>▲</th>
+          <th>Comments</th>
+          <th>Reports</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% posts.forEach(function (p) { %>
+          <tr>
+            <td>
+              <span class="badge badge-<%= p.type %>"><%= p.type %></span>
+              <a href="/posts/<%= p.id %>"><%= p.title %></a>
+            </td>
+            <td><a href="/u/<%= p.username %>">@<%= p.username %></a></td>
+            <td><%= p.score %></td>
+            <td><%= p.comments %></td>
+            <td>
+              <% if (p.open_reports > 0) { %>
+                <span class="status-banned"><%= p.open_reports %></span>
+              <% } else { %>0<% } %>
+            </td>
+            <td><%= p.created_at.slice(0, 10) %></td>
+            <td>
+              <% if (p.is_hidden) { %><span class="status-banned">Hidden</span><% } else { %>Visible<% } %>
+            </td>
+            <td>
+              <div class="admin-actions">
+                <% if (p.is_hidden) { %>
+                  <form action="/admin/posts/<%= p.id %>/unhide" method="POST">
+                    <input type="hidden" name="back" value="posts">
+                    <button type="submit" class="action-btn">Unhide</button>
+                  </form>
+                <% } else { %>
+                  <form action="/admin/posts/<%= p.id %>/hide" method="POST">
+                    <input type="hidden" name="back" value="posts">
+                    <button type="submit" class="action-btn">Hide</button>
+                  </form>
+                <% } %>
+
+                <form action="/admin/posts/<%= p.id %>/delete" method="POST" onsubmit="return confirm('Delete this post for good?');">
+                  <input type="hidden" name="back" value="posts">
+                  <button type="submit" class="btn-delete">Delete</button>
+                </form>
+
+                <% if (p.role !== 'admin' && !p.is_banned) { %>
+                  <form action="/admin/users/<%= p.user_id %>/ban" method="POST" onsubmit="return confirm('Ban @<%= p.username %>?');">
+                    <input type="hidden" name="back" value="posts">
+                    <button type="submit" class="btn-delete">Ban author</button>
+                  </form>
+                <% } else if (p.is_banned) { %>
+                  <span class="post-date">Author banned</span>
+                <% } %>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+<% } %>
+
+<%- include('partials/footer') %>

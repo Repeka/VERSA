@@ -7,7 +7,8 @@ const TYPES = ['question', 'artwork', 'poem'];
 
 // Home feed for logged-in members
 router.get('/', (req, res) => {
-  const type = TYPES.includes(req.query.type) ? req.query.type : 'all';
+  const following = req.query.feed === 'following';
+  const type = !following && TYPES.includes(req.query.type) ? req.query.type : 'all';
   const filter = type === 'all' ? '' : 'AND posts.type = ?';
   const typeParams = type === 'all' ? [] : [type];
   const userId = res.locals.currentUser.id;
@@ -16,6 +17,16 @@ router.get('/', (req, res) => {
   const notHidden = `AND posts.id NOT IN (
     SELECT post_id FROM interests WHERE user_id = ? AND value = -1
   )`;
+
+  // "Following" tab: only posts and reposts from people you follow
+  const postsFromFollowed = following
+    ? 'AND posts.user_id IN (SELECT followed_id FROM follows WHERE follower_id = ?)'
+    : '';
+  const repostsFromFollowed = following
+    ? 'AND reposts.user_id IN (SELECT followed_id FROM follows WHERE follower_id = ?)'
+    : '';
+
+  const values = [...typeParams, userId, ...(following ? [userId] : [])];
 
   const columns = `
     posts.id, posts.type, posts.title, posts.body, posts.image, posts.created_at,
@@ -30,7 +41,7 @@ router.get('/', (req, res) => {
       SELECT ${columns}, posts.created_at AS sort_time, posts.id AS sort_id, NULL AS reposted_by
       FROM posts
       JOIN users ON users.id = posts.user_id
-      WHERE posts.is_hidden = 0 ${filter} ${notHidden}
+      WHERE posts.is_hidden = 0 ${filter} ${notHidden} ${postsFromFollowed}
 
       UNION ALL
 
@@ -39,14 +50,26 @@ router.get('/', (req, res) => {
       JOIN posts ON posts.id = reposts.post_id
       JOIN users ON users.id = posts.user_id
       JOIN users AS reposter ON reposter.id = reposts.user_id
-      WHERE posts.is_hidden = 0 ${filter} ${notHidden}
+      WHERE posts.is_hidden = 0 ${filter} ${notHidden} ${repostsFromFollowed}
 
       ORDER BY sort_time DESC, sort_id DESC
       LIMIT 50
     `)
-    .all(...typeParams, userId, ...typeParams, userId);
+    .all(...values, ...values);
 
-  res.render('feed', { title: 'Home', posts, type });
+    const popularTags = db
+    .prepare(`
+      SELECT post_tags.tag, COUNT(*) AS n
+      FROM post_tags
+      JOIN posts ON posts.id = post_tags.post_id
+      WHERE posts.is_hidden = 0
+      GROUP BY post_tags.tag
+      ORDER BY n DESC, post_tags.tag
+      LIMIT 10
+    `)
+    .all();
+
+  res.render('feed', { title: 'Home', posts, type, following, popularTags });
 });
 
 module.exports = router;
