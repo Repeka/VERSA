@@ -21,5 +21,28 @@
       });
     })();
   </script>
+    <script>
+    (function () {
+      var button = document.querySelector('.theme-toggle');
+      if (!button) return;
+      var root = document.documentElement;
+
+      function show() {
+        var dark = root.getAttribute('data-theme') === 'dark';
+        button.textContent = dark ? '☀️' : '🌙';
+        button.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to night mode');
+      }
+      show();
+
+      button.addEventListener('click', function () {
+        var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        root.classList.add('theme-fade');
+        root.setAttribute('data-theme', next);
+        try { localStorage.setItem('versa-theme', next); } catch (e) {}
+        show();
+        setTimeout(function () { root.classList.remove('theme-fade'); }, 400);
+      });
+    })();
+  </script>
 </body>
 </html>
