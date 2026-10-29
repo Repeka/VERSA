@@ -10,15 +10,21 @@ VERSA is a learning project, written in English. Every user needs an account and
 
 - Sign up, log in and log out
 - Edit a profile with a display name, a bio and an avatar picture
-- Publish three kinds of posts:
+- Visit any member's profile to see their posts, stats and followers
+- Publish three kinds of posts, with optional tags:
   - **Question**: a title and details, answered by others with respectful opinions
   - **Artwork**: an image and a title, with an optional description
   - **Poem**: a title and the poem text (line breaks are kept)
-- Browse a home feed of the newest posts, with filter tabs: All, Questions, Artwork, Poems
+- Browse the home feed, with tabs: All, Following, Questions, Artwork, Poems
 - Comment on posts (comments on questions are shown as answers)
 - Upvote and downvote posts
 - Save posts to a personal Saved page
 - Report posts that break the community rules
+- Repost other people's posts, and mark posts as "interested" or "not interested" (not interested hides a post from your feed)
+- Follow other members, with followers and following lists
+- Search for posts, members and tags, and browse posts by tag
+- See the latest comments other people left on their own posts
+- Join **drawing challenges**: submit one entry, vote for one entry, and see the winner when the deadline passes
 
 **Admins get a private dashboard with**
 
@@ -26,13 +32,21 @@ VERSA is a learning project, written in English. Every user needs an account and
 - Sign-ups per day (last 14 days)
 - Most active members and most popular posts
 - Posts by type
+- A Posts page with hide, unhide and delete for any post, reported or not
 - Reported posts, with tools to hide, unhide, delete or dismiss them
 - A member list with ban and unban
+- Challenge creation, with rules and a deadline
+
+The layout also works on phones, with a menu button for the navigation bar.
 
 ## Roadmap
 
-- [ ] Drawing challenges with rules, a deadline, entries, votes and a winner
-- [ ] Reposts, "interested / not interested", follows, search and tags
+- [x] Accounts and profiles
+- [x] Posts, home feed, comments, votes, bookmarks and reports
+- [x] Admin dashboard and moderation
+- [x] Drawing challenges with votes and a winner
+- [x] Reposts, interested / not interested, follows, search and tags
+- [ ] Night mode and a smoother, more fluid design
 - [ ] Notifications and badges
 
 ## Tech stack
@@ -52,8 +66,8 @@ You need [Node.js](https://nodejs.org) (the LTS version) installed.
 
 ```bash
 # 1. Download the project
-git clone https://github.com/Repeka/versa.git
-cd versa
+git clone https://github.com/Repeka/VERSA.git
+cd VERSA
 
 # 2. Install the dependencies
 npm install
@@ -80,27 +94,37 @@ node make-admin.js yourusername
 ## Project structure
 
 ```
-versa/
-├── server.js          # Starts the app, sessions, sign up and log in
-├── db.js              # Opens the SQLite database and creates the tables
-├── make-admin.js      # Small script that turns a user into an admin
+VERSA/
+├── server.js            # Starts the app, sessions, sign up and log in
+├── db.js                # Opens the SQLite database and creates the tables
+├── make-admin.js        # Small script that turns a user into an admin
 ├── routes/
-│   ├── profile.js     # Profile pages and avatar upload
-│   ├── posts.js       # Create, view and delete posts
-│   ├── feed.js        # Home feed with filter tabs
-│   ├── comments.js    # Comments and answers
-│   ├── interactions.js# Votes, bookmarks and reports
-│   └── admin.js       # Admin dashboard and moderation
-├── views/             # EJS pages
-│   └── partials/      # Shared pieces: header, footer, post card, admin menu
+│   ├── profile.js       # Profile pages and avatar upload
+│   ├── posts.js         # Create, view and delete posts, with tags
+│   ├── feed.js          # Home feed, Following tab and filter tabs
+│   ├── comments.js      # Comments and answers
+│   ├── interactions.js  # Votes, bookmarks and reports
+│   ├── extras.js        # Reposts and interested / not interested
+│   ├── follows.js       # Follow, followers and following lists
+│   ├── search.js        # Search for posts, members and tags
+│   ├── tags.js          # Tag pages and the list of all tags
+│   ├── challenges.js    # Drawing challenges, entries and votes
+│   └── admin.js         # Admin dashboard and moderation
+├── views/               # EJS pages
+│   └── partials/        # Shared pieces: header, footer, post card, admin menu
 └── public/
-    ├── css/style.css  # All styling
-    └── uploads/       # Avatars and artwork (created automatically, not in Git)
+    ├── css/style.css    # All styling
+    └── uploads/         # Avatars and images (created automatically, not in Git)
 ```
 
 ## Database tables
 
-`users`, `posts` (with a `type` column for question, artwork or poem), `comments`, `votes`, `bookmarks` and `reports`. Challenge tables will be added later.
+| Area | Tables |
+| --- | --- |
+| Members | `users`, `follows` |
+| Posts | `posts` (with a `type` column for question, artwork or poem), `post_tags`, `comments` |
+| Interaction | `votes`, `bookmarks`, `reports`, `reposts`, `interests` |
+| Challenges | `challenges`, `submissions`, `challenge_votes` |
 
 ## Notes
 
