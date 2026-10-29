@@ -8,6 +8,9 @@ function requireLogin(req, res, next) {
   next();
 }
 
+// True when the request comes from our page script, not from a normal form click
+const wantsJson = (req) => req.get('X-Requested-With') === 'fetch';
+
 // Find a visible post, or stop with "not found"
 function findPost(req, res) {
   const post = db
@@ -15,6 +18,17 @@ function findPost(req, res) {
     .get(req.params.id);
   if (!post) res.status(404).send('Post not found');
   return post;
+}
+
+// The numbers shown under a post
+function counts(postId) {
+  const reposts = db
+    .prepare('SELECT COUNT(*) AS n FROM reposts WHERE post_id = ?')
+    .get(postId).n;
+  const interested = db
+    .prepare('SELECT COUNT(*) AS n FROM interests WHERE post_id = ? AND value = 1')
+    .get(postId).n;
+  return { reposts, interested };
 }
 
 // Repost / undo repost (not your own posts)
@@ -33,6 +47,13 @@ router.post('/posts/:id/repost', requireLogin, (req, res) => {
     } else {
       db.prepare('INSERT INTO reposts (post_id, user_id) VALUES (?, ?)').run(post.id, userId);
     }
+  }
+
+  if (wantsJson(req)) {
+    const mine = db
+      .prepare('SELECT 1 FROM reposts WHERE post_id = ? AND user_id = ?')
+      .get(post.id, userId);
+    return res.json({ reposted: !!mine, ...counts(post.id) });
   }
 
   res.redirect('/posts/' + post.id);
@@ -60,6 +81,13 @@ router.post('/posts/:id/interest', requireLogin, (req, res) => {
       db.prepare('INSERT INTO interests (post_id, user_id, value) VALUES (?, ?, ?)')
         .run(post.id, userId, value);
     }
+  }
+
+  if (wantsJson(req)) {
+    const mine = db
+      .prepare('SELECT value FROM interests WHERE post_id = ? AND user_id = ?')
+      .get(post.id, userId);
+    return res.json({ interest: mine ? mine.value : 0, ...counts(post.id) });
   }
 
   // Clicked on the home feed? Go back there.

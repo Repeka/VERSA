@@ -8,6 +8,9 @@ function requireLogin(req, res, next) {
   next();
 }
 
+// True when the request comes from our page script, not from a normal form click
+const wantsJson = (req) => req.get('X-Requested-With') === 'fetch';
+
 // Follow / unfollow
 router.post('/u/:username/follow', requireLogin, (req, res) => {
   const target = db
@@ -30,9 +33,20 @@ router.post('/u/:username/follow', requireLogin, (req, res) => {
     }
   }
 
-  // Come back to the followers / following list if that's where the click happened
+  // Answer for the page script: the new state, without a redirect
+  if (wantsJson(req)) {
+    const following = !!db
+      .prepare('SELECT 1 FROM follows WHERE follower_id = ? AND followed_id = ?')
+      .get(me.id, target.id);
+    const followers = db
+      .prepare('SELECT COUNT(*) AS n FROM follows WHERE followed_id = ?')
+      .get(target.id).n;
+    return res.json({ following, followers });
+  }
+
+  // Come back to the home page or the followers / following list if the click happened there
   const back = (req.body || {}).back;
-    if (
+  if (
     typeof back === 'string' &&
     (back === '/' || /^\/u\/[A-Za-z0-9_]+\/(followers|following)$/.test(back))
   ) {

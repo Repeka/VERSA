@@ -10,6 +10,9 @@ function requireLogin(req, res, next) {
   next();
 }
 
+// True when the request comes from our page script, not from a normal form click
+const wantsJson = (req) => req.get('X-Requested-With') === 'fetch';
+
 // Find a visible post, or stop with "not found"
 function findPost(req, res) {
   const post = db
@@ -17,6 +20,17 @@ function findPost(req, res) {
     .get(req.params.id);
   if (!post) res.status(404).send('Post not found');
   return post;
+}
+
+// The current score of a post, and what this member voted
+function voteState(postId, userId) {
+  const score = db
+    .prepare('SELECT COALESCE(SUM(value), 0) AS score FROM votes WHERE post_id = ?')
+    .get(postId).score;
+  const mine = db
+    .prepare('SELECT value FROM votes WHERE post_id = ? AND user_id = ?')
+    .get(postId, userId);
+  return { score, vote: mine ? mine.value : 0 };
 }
 
 // Upvote / downvote (click the same arrow again to undo)
@@ -45,6 +59,7 @@ router.post('/posts/:id/vote', requireLogin, (req, res) => {
     }
   }
 
+  if (wantsJson(req)) return res.json(voteState(post.id, userId));
   res.redirect('/posts/' + post.id);
 });
 
@@ -64,6 +79,7 @@ router.post('/posts/:id/bookmark', requireLogin, (req, res) => {
     db.prepare('INSERT INTO bookmarks (post_id, user_id) VALUES (?, ?)').run(post.id, userId);
   }
 
+  if (wantsJson(req)) return res.json({ bookmarked: !existing });
   res.redirect('/posts/' + post.id);
 });
 
