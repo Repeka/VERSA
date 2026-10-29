@@ -69,7 +69,27 @@ router.get('/', (req, res) => {
     `)
     .all();
 
-  res.render('feed', { title: 'Home', posts, type, following, popularTags });
+   // Side column: open challenges and members you might like to follow
+  const openChallenges = db
+    .prepare('SELECT id, title, deadline FROM challenges WHERE deadline > ? ORDER BY deadline LIMIT 3')
+    .all(new Date().toISOString());
+
+  const suggestedMembers = db
+    .prepare(`
+      SELECT users.id, users.username, users.display_name, users.avatar
+      FROM users
+      WHERE users.id != ? AND users.is_banned = 0
+        AND users.id NOT IN (SELECT followed_id FROM follows WHERE follower_id = ?)
+        AND EXISTS (SELECT 1 FROM posts WHERE posts.user_id = users.id AND posts.is_hidden = 0)
+      ORDER BY (SELECT COUNT(*) FROM posts WHERE posts.user_id = users.id AND posts.is_hidden = 0) DESC,
+               users.id DESC
+      LIMIT 5
+    `)
+    .all(userId, userId);
+
+  res.render('feed', {
+    title: 'Home', posts, type, following, popularTags, openChallenges, suggestedMembers
+  });
 });
 
 module.exports = router;

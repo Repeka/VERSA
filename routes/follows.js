@@ -32,7 +32,10 @@ router.post('/u/:username/follow', requireLogin, (req, res) => {
 
   // Come back to the followers / following list if that's where the click happened
   const back = (req.body || {}).back;
-  if (typeof back === 'string' && /^\/u\/[A-Za-z0-9_]+\/(followers|following)$/.test(back)) {
+    if (
+    typeof back === 'string' &&
+    (back === '/' || /^\/u\/[A-Za-z0-9_]+\/(followers|following)$/.test(back))
+  ) {
     return res.redirect(back);
   }
   res.redirect('/u/' + target.username);

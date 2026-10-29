@@ -37,7 +37,7 @@ VERSA is a learning project, written in English. Every user needs an account and
 - A member list with ban and unban
 - Challenge creation, with rules and a deadline
 
-The layout also works on phones, with a menu button for the navigation bar.
+The layout also works on phones, with a menu button for the navigation bar. A button in the navigation bar switches between light and night mode, and the choice is remembered.
 
 ## Roadmap
 
@@ -46,7 +46,7 @@ The layout also works on phones, with a menu button for the navigation bar.
 - [x] Admin dashboard and moderation
 - [x] Drawing challenges with votes and a winner
 - [x] Reposts, interested / not interested, follows, search and tags
-- [ ] Night mode and a smoother, more fluid design
+- [x] Instagram-inspired colors, night mode and a smoother, more fluid design
 - [ ] Notifications and badges
 
 ## Tech stack
