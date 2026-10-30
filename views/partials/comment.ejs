@@ -1,0 +1,19 @@
+<div class="comment" id="comment-<%= c.id %>">
+  <div class="post-author">
+    <% if (c.avatar) { %>
+      <img class="avatar avatar-small" src="<%= c.avatar %>" alt="">
+    <% } else { %>
+      <div class="avatar avatar-small avatar-letter"><%= c.username.charAt(0).toUpperCase() %></div>
+    <% } %>
+    <a href="/u/<%= c.username %>"><%= c.display_name || c.username %></a>
+    <span class="post-date">· <%= c.created_at.slice(0, 10) %></span>
+  </div>
+
+  <p class="comment-body"><%= c.body %></p>
+
+  <% if (c.user_id === currentUser.id) { %>
+    <form action="/comments/<%= c.id %>/delete" method="POST" onsubmit="return confirm('Delete this comment?');">
+      <button type="submit" class="comment-delete">Delete</button>
+    </form>
+  <% } %>
+</div>

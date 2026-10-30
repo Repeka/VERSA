@@ -182,19 +182,47 @@ router.post('/challenges/:id/submit', requireLogin, (req, res) => {
   });
 });
 
+// True when the request comes from our page script, not from a normal form click
+const wantsJson = (req) => req.get('X-Requested-With') === 'fetch';
+
+// The vote count of every entry in a challenge, and what this member voted for
+function challengeVoteState(challengeId, userId) {
+  const counts = {};
+  db.prepare(`
+    SELECT submissions.id,
+      (SELECT COUNT(*) FROM challenge_votes
+        WHERE challenge_votes.submission_id = submissions.id) AS votes
+    FROM submissions
+    WHERE submissions.challenge_id = ?
+  `)
+    .all(challengeId)
+    .forEach((row) => { counts[row.id] = row.votes; });
+
+  const mine = db
+    .prepare('SELECT submission_id FROM challenge_votes WHERE challenge_id = ? AND user_id = ?')
+    .get(challengeId, userId);
+
+  return { counts, votedId: mine ? mine.submission_id : null };
+}
+
 // Vote for an entry (one vote per challenge, click again to undo)
 router.post('/challenges/:id/vote', requireLogin, (req, res) => {
   const challenge = db.prepare('SELECT * FROM challenges WHERE id = ?').get(req.params.id);
   if (!challenge) return res.status(404).send('Challenge not found');
 
   const back = '/challenges/' + challenge.id;
-  if (!isOpen(challenge)) return res.redirect(back);
+  const userId = req.session.userId;
+
+  // The page script gets the new numbers, a normal form click gets a redirect
+  const reply = () =>
+    wantsJson(req) ? res.json(challengeVoteState(challenge.id, userId)) : res.redirect(back);
+
+  if (!isOpen(challenge)) return reply();
 
   const submissionId = parseInt((req.body || {}).submission_id, 10) || 0;
   const entry = db
     .prepare('SELECT id, user_id FROM submissions WHERE id = ? AND challenge_id = ?')
     .get(submissionId, challenge.id);
-  const userId = req.session.userId;
 
   // No voting for your own entry
   if (entry && entry.user_id !== userId) {
@@ -212,7 +240,7 @@ router.post('/challenges/:id/vote', requireLogin, (req, res) => {
     }
   }
 
-  res.redirect(back);
+  reply();
 });
 
 // Withdraw your entry (while open) or remove any entry (admin)

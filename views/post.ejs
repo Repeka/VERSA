@@ -2,26 +2,27 @@
 
 <article class="post">
   <% if (currentUser.role === 'admin') { %>
-  <div class="admin-bar">
-    <strong>Admin</strong>
-    <% if (post.is_hidden) { %>
-      <span class="status-banned">This post is hidden from everyone else.</span>
-      <form action="/admin/posts/<%= post.id %>/unhide" method="POST">
-        <input type="hidden" name="back" value="post">
-        <button type="submit" class="action-btn">Unhide</button>
-      </form>
-    <% } else { %>
-      <form action="/admin/posts/<%= post.id %>/hide" method="POST" onsubmit="return confirm('Hide this post from everyone?');">
+    <div class="admin-bar">
+      <strong>Admin</strong>
+      <% if (post.is_hidden) { %>
+        <span class="status-banned">This post is hidden from everyone else.</span>
+        <form action="/admin/posts/<%= post.id %>/unhide" method="POST">
+          <input type="hidden" name="back" value="post">
+          <button type="submit" class="action-btn">Unhide</button>
+        </form>
+      <% } else { %>
+        <form action="/admin/posts/<%= post.id %>/hide" method="POST" onsubmit="return confirm('Hide this post from everyone?');">
+          <input type="hidden" name="back" value="feed">
+          <button type="submit" class="action-btn">Hide post</button>
+        </form>
+      <% } %>
+      <form action="/admin/posts/<%= post.id %>/delete" method="POST" onsubmit="return confirm('Delete this post for good?');">
         <input type="hidden" name="back" value="feed">
-        <button type="submit" class="action-btn">Hide post</button>
+        <button type="submit" class="btn-delete">Delete post</button>
       </form>
-    <% } %>
-    <form action="/admin/posts/<%= post.id %>/delete" method="POST" onsubmit="return confirm('Delete this post for good?');">
-      <input type="hidden" name="back" value="feed">
-      <button type="submit" class="btn-delete">Delete post</button>
-    </form>
-  </div>
-<% } %>
+    </div>
+  <% } %>
+
   <span class="badge badge-<%= post.type %>"><%= post.type %></span>
   <h1><%= post.title %></h1>
 
@@ -53,55 +54,79 @@
   <% } %>
 
   <div class="actions">
-  <div class="vote-box">
-    <% if (!isOwner) { %>
-      <form action="/posts/<%= post.id %>/vote" method="POST">
-        <input type="hidden" name="value" value="up">
-        <button type="submit" class="vote-btn <%= vote === 1 ? 'active-up' : '' %>" title="Upvote">▲</button>
-      </form>
-    <% } %>
+    <div class="vote-box">
+      <% if (!isOwner) { %>
+        <form action="/posts/<%= post.id %>/vote" method="POST">
+          <input type="hidden" name="value" value="up">
+          <button type="submit" class="vote-btn <%= vote === 1 ? 'active-up' : '' %>" title="Upvote">▲</button>
+        </form>
+      <% } %>
 
-    <span class="score"><%= score %></span>
+      <span class="score"><%= score %></span>
 
-    <% if (!isOwner) { %>
-      <form action="/posts/<%= post.id %>/vote" method="POST">
-        <input type="hidden" name="value" value="down">
-        <button type="submit" class="vote-btn <%= vote === -1 ? 'active-down' : '' %>" title="Downvote">▼</button>
-      </form>
-    <% } %>
+      <% if (!isOwner) { %>
+        <form action="/posts/<%= post.id %>/vote" method="POST">
+          <input type="hidden" name="value" value="down">
+          <button type="submit" class="vote-btn <%= vote === -1 ? 'active-down' : '' %>" title="Downvote">▼</button>
+        </form>
+      <% } %>
+    </div>
+
+    <form action="/posts/<%= post.id %>/bookmark" method="POST">
+      <button type="submit" class="action-btn <%= bookmarked ? 'active' : '' %>">
+        <%= bookmarked ? '★ Saved' : '☆ Save' %>
+      </button>
+    </form>
   </div>
 
-  <form action="/posts/<%= post.id %>/bookmark" method="POST">
-    <button type="submit" class="action-btn <%= bookmarked ? 'active' : '' %>">
-      <%= bookmarked ? '★ Saved' : '☆ Save' %>
-    </button>
-  </form>
-</div>
+  <div class="actions actions-secondary">
+    <% if (!isOwner) { %>
+      <form action="/posts/<%= post.id %>/repost" method="POST">
+        <button type="submit" class="action-btn <%= reposted ? 'active' : '' %>">
+          🔁 <%= reposted ? 'Reposted' : 'Repost' %>
+        </button>
+      </form>
 
-<% if (justReported) { %>
-  <p class="notice">Thank you. Your report was sent to the admin.</p>
-<% } %>
+      <form action="/posts/<%= post.id %>/interest" method="POST">
+        <input type="hidden" name="value" value="yes">
+        <button type="submit" class="action-btn <%= interest === 1 ? 'active' : '' %>">👍 Interested</button>
+      </form>
 
-<% if (!isOwner) { %>
-  <details class="report-box">
-    <summary>⚑ Report this post</summary>
-    <% if (reported) { %>
-      <p class="no-comments">You already reported this post.</p>
-    <% } else { %>
-      <form action="/posts/<%= post.id %>/report" method="POST">
-        <label>Why are you reporting it?</label>
-        <select name="reason">
-          <option>Spam</option>
-          <option>Disrespectful or hateful</option>
-          <option>Inappropriate content</option>
-          <option>Other</option>
-        </select>
-        <textarea name="details" rows="3" maxlength="500" placeholder="Anything else we should know? (optional)"></textarea>
-        <button type="submit" class="btn-delete">Send report</button>
+      <form action="/posts/<%= post.id %>/interest" method="POST">
+        <input type="hidden" name="value" value="no">
+        <button type="submit" class="action-btn <%= interest === -1 ? 'active' : '' %>">🙈 Not interested</button>
       </form>
     <% } %>
-  </details>
-<% } %>
+
+    <span class="post-date">
+      <%= repostCount %> repost<%= repostCount === 1 ? '' : 's' %> · <%= interestedCount %> interested
+    </span>
+  </div>
+
+  <% if (justReported) { %>
+    <p class="notice">Thank you. Your report was sent to the admin.</p>
+  <% } %>
+
+  <% if (!isOwner) { %>
+    <details class="report-box">
+      <summary>⚑ Report this post</summary>
+      <% if (reported) { %>
+        <p class="no-comments">You already reported this post.</p>
+      <% } else { %>
+        <form action="/posts/<%= post.id %>/report" method="POST">
+          <label>Why are you reporting it?</label>
+          <select name="reason">
+            <option>Spam</option>
+            <option>Disrespectful or hateful</option>
+            <option>Inappropriate content</option>
+            <option>Other</option>
+          </select>
+          <textarea name="details" rows="3" maxlength="500" placeholder="Anything else we should know? (optional)"></textarea>
+          <button type="submit" class="btn-delete">Send report</button>
+        </form>
+      <% } %>
+    </details>
+  <% } %>
 
   <% if (isOwner) { %>
     <form action="/posts/<%= post.id %>/delete" method="POST" onsubmit="return confirm('Delete this post for good?');">
@@ -109,9 +134,10 @@
     </form>
   <% } %>
 </article>
+
 <section class="comments" id="comments">
   <% const isQuestion = post.type === 'question'; %>
-  <h2><%= isQuestion ? 'Answers' : 'Comments' %> (<%= comments.length %>)</h2>
+  <h2><%= isQuestion ? 'Answers' : 'Comments' %> (<span class="comment-count"><%= comments.length %></span>)</h2>
 
   <form action="/posts/<%= post.id %>/comments" method="POST" class="comment-form">
     <textarea name="body" rows="3" maxlength="1000" required
@@ -121,57 +147,13 @@
     </button>
   </form>
 
-  <% if (comments.length === 0) { %>
-    <p class="no-comments">Nothing here yet. Start the conversation!</p>
-  <% } %>
+  <p class="no-comments" <%- comments.length > 0 ? 'hidden' : '' %>>Nothing here yet. Start the conversation!</p>
 
-  <% comments.forEach(function (c) { %>
-    <div class="comment" id="comment-<%= c.id %>">
-      <div class="post-author">
-        <% if (c.avatar) { %>
-          <img class="avatar avatar-small" src="<%= c.avatar %>" alt="">
-        <% } else { %>
-          <div class="avatar avatar-small avatar-letter"><%= c.username.charAt(0).toUpperCase() %></div>
-        <% } %>
-        <a href="/u/<%= c.username %>"><%= c.display_name || c.username %></a>
-        <span class="post-date">· <%= c.created_at.slice(0, 10) %></span>
-      </div>
-
-      <p class="comment-body"><%= c.body %></p>
-
-      <% if (c.user_id === currentUser.id) { %>
-        <form action="/comments/<%= c.id %>/delete" method="POST" onsubmit="return confirm('Delete this comment?');">
-          <button type="submit" class="comment-delete">Delete</button>
-        </form>
-      <% } %>
-    </div>
-  <% }) %>
+  <div class="comment-list">
+    <% comments.forEach(function (c) { %>
+      <%- include('partials/comment', { c: c }) %>
+    <% }) %>
+  </div>
 </section>
-
-<div class="actions actions-secondary">
-  <% if (!isOwner) { %>
-    <form action="/posts/<%= post.id %>/repost" method="POST">
-      <button type="submit" class="action-btn <%= reposted ? 'active' : '' %>">
-        🔁 <%= reposted ? 'Reposted' : 'Repost' %>
-      </button>
-    </form>
-
-    <form action="/posts/<%= post.id %>/interest" method="POST">
-      <input type="hidden" name="value" value="yes">
-      <button type="submit" class="action-btn <%= interest === 1 ? 'active' : '' %>">👍 Interested</button>
-    </form>
-
-    <form action="/posts/<%= post.id %>/interest" method="POST">
-      <input type="hidden" name="value" value="no">
-      <button type="submit" class="action-btn <%= interest === -1 ? 'active' : '' %>">🙈 Not interested</button>
-    </form>
-  <% } %>
-
-  <span class="post-date">
-    <%= repostCount %> repost<%= repostCount === 1 ? '' : 's' %> · <%= interestedCount %> interested
-  </span>
-</div>
-
-
 
 <%- include('partials/footer') %>

@@ -63,7 +63,7 @@
 <div class="entry-grid">
   <% entries.forEach(function (e) { %>
     <% const isWinner = winner && winner.id === e.id; %>
-    <article class="entry <%= isWinner ? 'entry-winner' : '' %>">
+        <article class="entry <%= isWinner ? 'entry-winner' : '' %>" data-entry="<%= e.id %>">
       <% if (isWinner) { %><div class="crown">🏆 Winner</div><% } %>
       <img src="<%= e.image %>" alt="<%= e.title %>">
 

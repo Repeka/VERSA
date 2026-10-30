@@ -1,4 +1,4 @@
-// VERSA page script: lets some buttons work without reloading the page.
+// VERSA page script: lets buttons work without reloading the page.
 // If anything goes wrong, the page simply reloads and shows the real state.
 
 (function () {
@@ -8,10 +8,16 @@
     { test: /\/posts\/\d+\/bookmark$/, run: updateBookmark },
     { test: /\/posts\/\d+\/repost$/, run: updateRepost },
     { test: /\/posts\/\d+\/interest$/, run: updateInterest },
-    { test: /\/u\/[A-Za-z0-9_]+\/follow$/, run: updateFollow }
+    { test: /\/u\/[A-Za-z0-9_]+\/follow$/, run: updateFollow },
+    { test: /\/posts\/\d+\/comments$/, run: addComment, before: checkComment },
+    { test: /\/comments\/\d+\/delete$/, run: removeComment },
+    { test: /\/challenges\/\d+\/vote$/, run: updateChallengeVote }
   ];
 
   document.addEventListener('submit', function (event) {
+    // The person clicked "Cancel" in a confirm box
+    if (event.defaultPrevented) return;
+
     var form = event.target;
     if (!(form instanceof HTMLFormElement)) return;
     if (form.method.toLowerCase() !== 'post') return;
@@ -22,6 +28,7 @@
     if (!handler) return;
 
     event.preventDefault();
+    if (handler.before && handler.before(form) === false) return;
     send(form, handler.run);
   });
 
@@ -77,7 +84,7 @@
     toast.timer = setTimeout(function () { box.classList.remove('show'); }, 3500);
   }
 
-  // Votes and saves
+  // ---------- Votes and saves ----------
   function updateVote(form, data) {
     var box = form.closest('.vote-box');
     if (!box) return;
@@ -103,7 +110,7 @@
     pop(button);
   }
 
-  // Reposts and interested / not interested
+  // ---------- Reposts and interested / not interested ----------
   function updateCounter(form, data) {
     var row = form.closest('.actions-secondary');
     var counter = row && row.querySelector('.post-date');
@@ -156,7 +163,7 @@
     toast('Hidden from your feed. You can undo it on the post page.');
   }
 
-  // Follow buttons: profile, followers lists and the "Who to follow" box
+  // ---------- Follow buttons ----------
   function updateFollow(form, data) {
     var button = form.querySelector('button');
     if (!button) return;
@@ -178,5 +185,69 @@
       var count = document.querySelector('.profile-stats a[href$="/followers"] strong');
       if (count) count.textContent = data.followers;
     }
+  }
+
+  // ---------- Comments ----------
+  function checkComment(form) {
+    var field = form.querySelector('textarea');
+    if (field && field.value.trim() === '') {
+      toast('Please write something first.');
+      return false;
+    }
+    return true;
+  }
+
+  function setCommentCount(section, count) {
+    var number = section.querySelector('.comment-count');
+    if (number) number.textContent = count;
+    var empty = section.querySelector('.no-comments');
+    if (empty) empty.hidden = count > 0;
+  }
+
+  function addComment(form, data) {
+    var section = form.closest('.comments');
+    var list = section && section.querySelector('.comment-list');
+    if (!list) return;
+
+    list.insertAdjacentHTML('beforeend', data.html);
+    var added = list.lastElementChild;
+    if (added) {
+      added.classList.add('comment-new');
+      added.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    form.querySelector('textarea').value = '';
+    setCommentCount(section, data.count);
+  }
+
+  function removeComment(form, data) {
+    var comment = form.closest('.comment');
+    var section = form.closest('.comments');
+    if (!comment) return;
+
+    comment.classList.add('card-leave');
+    setTimeout(function () { comment.remove(); }, 300);
+    if (section) setCommentCount(section, data.count);
+  }
+
+  // ---------- Challenge votes ----------
+  function updateChallengeVote(form, data) {
+    document.querySelectorAll('.entry[data-entry]').forEach(function (entry) {
+      var id = entry.getAttribute('data-entry');
+      var score = entry.querySelector('.entry-actions .score');
+      if (score && data.counts[id] !== undefined) {
+        var n = data.counts[id];
+        score.textContent = n + ' vote' + (n === 1 ? '' : 's');
+      }
+
+      var voteForm = entry.querySelector('.entry-actions form input[name="submission_id"]');
+      var button = voteForm && voteForm.form.querySelector('button');
+      if (button) {
+        var voted = String(data.votedId) === id;
+        button.textContent = voted ? '✓ Voted' : 'Vote';
+        button.classList.toggle('active', voted);
+        if (voted) pop(button);
+      }
+    });
   }
 })();

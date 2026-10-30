@@ -710,3 +710,11 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: non
 }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
+/* Comments that appear and disappear smoothly */
+.comment.card-leave {
+  opacity: 0; transform: translateY(-6px) scale(0.98);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.comment-new { animation: page-in 0.35s ease both; }
+.no-comments[hidden] { display: none; }
+
