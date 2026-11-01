@@ -120,6 +120,20 @@ app.use(require('./routes/extras'));
 app.use(require('./routes/follows'));
 app.use(require('./routes/search'));
 app.use(require('./routes/tags'));
+// Some browsers ask for this old icon address
+app.get('/favicon.ico', (req, res) => res.redirect('/favicon.svg'));
+
+// Page not found
+app.use((req, res) => {
+  res.status(404).render('404', { title: 'Page not found' });
+});
+
+// Something went wrong on the server
+app.use((err, req, res, next) => {
+  console.error(err);
+  if (res.headersSent) return next(err);
+  res.status(500).render('error', { title: 'Something went wrong' });
+});
 app.listen(PORT, () => {
   console.log(`VERSA is running at http://localhost:${PORT}`);
 });

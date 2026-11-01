@@ -718,3 +718,36 @@ input:focus-visible, textarea:focus-visible, select:focus-visible { outline: non
 .comment-new { animation: page-in 0.35s ease both; }
 .no-comments[hidden] { display: none; }
 
+/* Error pages */
+.error-page { text-align: center; padding: 60px 10px; }
+.error-code {
+  font-family: 'Playfair Display', serif; font-weight: 800; line-height: 1;
+  font-size: clamp(4rem, 14vw, 7rem); margin-bottom: 10px;
+  background: var(--gradient); -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.error-page h1 { font-family: 'Playfair Display', serif; margin-bottom: 10px; }
+.error-page p:not(.error-code) { color: var(--muted); max-width: 440px; margin: 0 auto 26px; line-height: 1.6; }
+
+/* Click an artwork to see it big */
+.post-image, .entry > img { cursor: zoom-in; }
+.no-scroll { overflow: hidden; }
+.lightbox {
+  position: fixed; inset: 0; z-index: 200; padding: 20px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0, 0, 0, 0.88); cursor: zoom-out;
+  opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
+}
+.lightbox.open { opacity: 1; pointer-events: auto; }
+.lightbox img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px; }
+.lightbox-close {
+  position: absolute; top: 16px; right: 16px; width: 40px; height: 40px;
+  border: none; border-radius: 50%; cursor: pointer; font-size: 1.1rem;
+  background: rgba(255, 255, 255, 0.15); color: #ffffff;
+}
+.lightbox-close:hover { background: rgba(255, 255, 255, 0.3); }
+
+/* Image preview before uploading */
+.upload-preview {
+  display: block; max-width: 100%; max-height: 260px; margin: 10px 0 0;
+  border-radius: 8px; border: 1px solid var(--border);
+}
