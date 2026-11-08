@@ -8,7 +8,14 @@
     }
     sessionStorage.setItem('versa-intro', '1');
   } catch (e) {}
-
+  // "Skip intro" shows everything right away
+  var skip = document.querySelector('.skip-intro');
+  if (skip) {
+    skip.addEventListener('click', function () {
+      document.documentElement.classList.add('intro-seen');
+      skip.style.display = 'none';
+    });
+  }
   var canvas = document.getElementById('particles');
   if (!canvas) return;
 
