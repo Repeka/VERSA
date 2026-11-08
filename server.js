@@ -50,7 +50,7 @@ app.use((req, res, next) => {
 // Home
 // Home: visitors see the welcome page, members see the feed (routes/feed.js)
 app.get('/', (req, res, next) => {
-  if (!res.locals.currentUser) return res.render('home', { title: 'Home' });
+  if (!res.locals.currentUser) return res.render('home', { title: 'Home', bodyClass: 'welcome' });
   next();
 });
 

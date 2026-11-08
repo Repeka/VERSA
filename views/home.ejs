@@ -1,5 +1,13 @@
 <%- include('partials/header') %>
 
+<div class="welcome-bg" aria-hidden="true">
+  <div class="welcome-light light-1"></div>
+  <div class="welcome-light light-2"></div>
+  <div class="welcome-light light-3"></div>
+  <div class="welcome-light light-4"></div>
+  <canvas id="particles"></canvas>
+</div>
+
 <section class="hero">
   <h1>Where words and colors meet</h1>
   <p>Share poems, show your artwork, ask the questions that matter, and talk with people who love creating.</p>
@@ -20,5 +28,7 @@
     <p>Share the words you wrote and read what others felt.</p>
   </div>
 </section>
+
+<script src="/js/welcome.js"></script>
 
 <%- include('partials/footer') %>
