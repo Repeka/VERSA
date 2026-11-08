@@ -144,6 +144,29 @@ const myInterest = db
   .prepare('SELECT value FROM interests WHERE post_id = ? AND user_id = ?')
   .get(post.id, userId);
 
+  const myRatingRow = db
+  .prepare('SELECT stars FROM ratings WHERE post_id = ? AND user_id = ?')
+  .get(post.id, userId);
+const myRating = myRatingRow ? myRatingRow.stars : 0;
+
+// Only the admin gets the numbers and the list of who rated what
+let ratingSummary = null;
+let ratingList = [];
+if (res.locals.currentUser.role === 'admin') {
+  ratingSummary = db
+    .prepare('SELECT COUNT(*) AS count, COALESCE(AVG(stars), 0) AS average FROM ratings WHERE post_id = ?')
+    .get(post.id);
+  ratingList = db
+    .prepare(`
+      SELECT ratings.stars, users.username
+      FROM ratings
+      JOIN users ON users.id = ratings.user_id
+      WHERE ratings.post_id = ?
+      ORDER BY ratings.id DESC
+    `)
+    .all(post.id);
+}
+
   res.render('post', {
     title: post.title,
     post,
@@ -153,6 +176,9 @@ const myInterest = db
     bookmarked,
     reported,
     justReported: req.query.reported === '1',
+    myRating,
+ratingSummary,
+ratingList,
     repostCount,
 reposted,
 interestedCount,
@@ -176,8 +202,9 @@ db.prepare('DELETE FROM bookmarks WHERE post_id = ?').run(post.id);
 db.prepare('DELETE FROM reports WHERE post_id = ?').run(post.id);
 db.prepare('DELETE FROM reposts WHERE post_id = ?').run(post.id);
 db.prepare('DELETE FROM interests WHERE post_id = ?').run(post.id);
-  db.prepare('DELETE FROM posts WHERE id = ?').run(post.id);
-  db.prepare('DELETE FROM post_tags WHERE post_id = ?').run(post.id);
+db.prepare('DELETE FROM posts WHERE id = ?').run(post.id);
+db.prepare('DELETE FROM post_tags WHERE post_id = ?').run(post.id);
+db.prepare('DELETE FROM ratings WHERE post_id = ?').run(post.id);
   res.redirect('/u/' + res.locals.currentUser.username);
 });
 

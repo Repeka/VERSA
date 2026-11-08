@@ -130,7 +130,9 @@ router.get('/admin/posts', (req, res) => {
              COALESCE((SELECT SUM(value) FROM votes WHERE votes.post_id = posts.id), 0) AS score,
              (SELECT COUNT(*) FROM comments WHERE comments.post_id = posts.id) AS comments,
              (SELECT COUNT(*) FROM reports
-                WHERE reports.post_id = posts.id AND reports.status = 'open') AS open_reports
+                               WHERE reports.post_id = posts.id AND reports.status = 'open') AS open_reports,
+             (SELECT ROUND(AVG(stars), 1) FROM ratings WHERE ratings.post_id = posts.id) AS rating_avg,
+             (SELECT COUNT(*) FROM ratings WHERE ratings.post_id = posts.id) AS rating_count
       FROM posts
       JOIN users ON users.id = posts.user_id
       ${where}

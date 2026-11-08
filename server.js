@@ -28,6 +28,12 @@ app.use((req, res, next) => {
       .prepare('SELECT tag FROM post_tags WHERE post_id = ? ORDER BY tag')
       .all(postId)
       .map((r) => r.tag); 
+      
+  // Average rating of a post, shown to everyone (who rated is never shown)
+  res.locals.ratingFor = (postId) =>
+    db
+      .prepare('SELECT COUNT(*) AS count, ROUND(AVG(stars), 1) AS average FROM ratings WHERE post_id = ?')
+      .get(postId);
   if (req.session.userId) {
     const user = db
       .prepare('SELECT id, username, role, is_banned FROM users WHERE id = ?')
@@ -120,6 +126,7 @@ app.use(require('./routes/extras'));
 app.use(require('./routes/follows'));
 app.use(require('./routes/search'));
 app.use(require('./routes/tags'));
+app.use(require('./routes/ratings'));
 // Some browsers ask for this old icon address
 app.get('/favicon.ico', (req, res) => res.redirect('/favicon.svg'));
 

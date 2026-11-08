@@ -4,7 +4,8 @@
   <% } %>
   <div class="feed-top">
     <span class="badge badge-<%= post.type %>"><%= post.type %></span>
-    <span class="post-date">▲ <%= post.score || 0 %> · 💬 <%= post.comment_count || 0 %> · <%= post.created_at.slice(0, 10) %></span>
+    <% const cardRating = ratingFor(post.id); %>
+<span class="post-date">▲ <%= post.score || 0 %> · 💬 <%= post.comment_count || 0 %><% if (cardRating.count > 0) { %> · <span class="card-stars">★ <%= cardRating.average.toFixed(1) %></span><% } %> · <%= post.created_at.slice(0, 10) %></span>
   </div>
 
   <h2><a href="/posts/<%= post.id %>"><%= post.title %></a></h2>

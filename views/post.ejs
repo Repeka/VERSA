@@ -103,6 +103,57 @@
     </span>
   </div>
 
+  <% const rating = ratingFor(post.id); %>
+  <div class="rating-row">
+    <div class="rating-summary">
+      <% if (rating.count > 0) { %>
+        <span class="rating-stars-static"><%= '★'.repeat(Math.round(rating.average)) %><span class="off"><%= '★'.repeat(5 - Math.round(rating.average)) %></span></span>
+        <strong><%= rating.average.toFixed(1) %></strong>
+        <span class="post-date">(<%= rating.count %> rating<%= rating.count === 1 ? '' : 's' %>)</span>
+      <% } else { %>
+        <span class="post-date">No ratings yet</span>
+      <% } %>
+    </div>
+
+    <% if (!isOwner) { %>
+      <div class="rating-mine">
+        <span class="rating-label">Your rating</span>
+        <div class="rating-stars">
+          <% for (let n = 1; n <= 5; n++) { %>
+            <form action="/posts/<%= post.id %>/rate" method="POST">
+              <input type="hidden" name="stars" value="<%= n %>">
+              <button type="submit" class="star <%= n <= myRating ? 'on' : '' %>"
+                title="<%= n %> star<%= n === 1 ? '' : 's' %>"
+                aria-label="<%= n %> star<%= n === 1 ? '' : 's' %>">★</button>
+            </form>
+          <% } %>
+        </div>
+      </div>
+    <% } %>
+  </div>
+
+  <% if (!isOwner) { %>
+    <p class="post-date rating-note">Everyone can see the average. Only the admin can see who rated.</p>
+  <% } %>
+
+  <% if (currentUser.role === 'admin') { %>
+    <div class="rating-admin">
+      <strong>Who rated</strong> <span class="post-date">(only you can see this)</span>
+      <% if (ratingList.length === 0) { %>
+        <p class="no-comments">Nobody has rated this post yet.</p>
+      <% } else { %>
+        <ul class="rating-list">
+          <% ratingList.forEach(function (r) { %>
+            <li>
+              <a href="/u/<%= r.username %>">@<%= r.username %></a>
+              <span class="rating-stars-static"><%= '★'.repeat(r.stars) %><span class="off"><%= '★'.repeat(5 - r.stars) %></span></span>
+            </li>
+          <% }) %>
+        </ul>
+      <% } %>
+    </div>
+  <% } %>
+
   <% if (justReported) { %>
     <p class="notice">Thank you. Your report was sent to the admin.</p>
   <% } %>

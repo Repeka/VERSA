@@ -153,5 +153,17 @@ db.exec(`
     UNIQUE (post_id, tag)
   )
 `);
+// Private star ratings on posts (only the admin can see them)
+db.exec(`
+  CREATE TABLE IF NOT EXISTS ratings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    post_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    stars INTEGER NOT NULL CHECK (stars BETWEEN 1 AND 5),
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (post_id, user_id)
+  )
+`);
+
 
 module.exports = db;

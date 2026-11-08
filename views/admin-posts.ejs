@@ -20,6 +20,7 @@
           <th>Author</th>
           <th>▲</th>
           <th>Comments</th>
+                    <th>★ Rating</th>
           <th>Reports</th>
           <th>Date</th>
           <th>Status</th>
@@ -36,6 +37,7 @@
             <td><a href="/u/<%= p.username %>">@<%= p.username %></a></td>
             <td><%= p.score %></td>
             <td><%= p.comments %></td>
+                        <td><%= p.rating_count ? p.rating_avg + ' (' + p.rating_count + ')' : '—' %></td>
             <td>
               <% if (p.open_reports > 0) { %>
                 <span class="status-banned"><%= p.open_reports %></span>

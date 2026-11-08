@@ -37,7 +37,8 @@
             <div class="gallery-img"><img src="<%= post.image %>" alt="<%= post.title %>" loading="lazy"></div>
             <div class="gallery-caption">
               <strong><%= post.title %></strong>
-              <span>@<%= post.username %> · ▲ <%= post.score || 0 %></span>
+                            <% const galleryRating = ratingFor(post.id); %>
+              <span>@<%= post.username %> · ▲ <%= post.score || 0 %><% if (galleryRating.count > 0) { %> · ★ <%= galleryRating.average.toFixed(1) %><% } %></span>
             </div>
           </a>
         <% }) %>

@@ -11,7 +11,8 @@
     { test: /\/u\/[A-Za-z0-9_]+\/follow$/, run: updateFollow },
     { test: /\/posts\/\d+\/comments$/, run: addComment, before: checkComment },
     { test: /\/comments\/\d+\/delete$/, run: removeComment },
-    { test: /\/challenges\/\d+\/vote$/, run: updateChallengeVote }
+        { test: /\/challenges\/\d+\/vote$/, run: updateChallengeVote },
+    { test: /\/posts\/\d+\/rate$/, run: updateRating }
   ];
 
   document.addEventListener('submit', function (event) {
@@ -228,6 +229,41 @@
     comment.classList.add('card-leave');
     setTimeout(function () { comment.remove(); }, 300);
     if (section) setCommentCount(section, data.count);
+  }
+
+   // ---------- Star ratings ----------
+  function updateRating(form, data) {
+    // The admin also sees the list of who rated, so show the real page
+    if (document.querySelector('.rating-admin')) {
+      window.location.reload();
+      return;
+    }
+
+    // Your own stars
+    var row = form.closest('.rating-stars');
+    if (row) {
+      row.querySelectorAll('form').forEach(function (f) {
+        var field = f.querySelector('input[name="stars"]');
+        var star = f.querySelector('button');
+        if (field && star) star.classList.toggle('on', Number(field.value) <= data.mine);
+      });
+    }
+    pop(form.querySelector('button'));
+
+    // The average everyone can see
+    var summary = document.querySelector('.rating-summary');
+    if (!summary) return;
+
+    if (data.count > 0) {
+      var rounded = Math.round(data.average);
+      summary.innerHTML =
+        '<span class="rating-stars-static">' + '★'.repeat(rounded) +
+        '<span class="off">' + '★'.repeat(5 - rounded) + '</span></span> ' +
+        '<strong>' + Number(data.average).toFixed(1) + '</strong> ' +
+        '<span class="post-date">(' + data.count + ' rating' + (data.count === 1 ? '' : 's') + ')</span>';
+    } else {
+      summary.innerHTML = '<span class="post-date">No ratings yet</span>';
+    }
   }
 
   // ---------- Challenge votes ----------
